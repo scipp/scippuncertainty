@@ -4,7 +4,7 @@
 
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import numpy as np
 from rich.console import Group
@@ -17,7 +17,7 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 
-from ..logging import get_logger
+from ..random import make_rngs
 from .accumulator import VarianceAccum
 
 
@@ -49,18 +49,16 @@ class Bootstrap:
     def __init__(self,
                  samplers: dict,
                  *,
-                 seed: Optional[Union[int, np.random.SeedSequence]] = None,
+                 seed: Optional[Union[np.random.Generator,
+                                      List[np.random.Generator], int,
+                                      List[int],
+                                      np.random.SeedSequence]] = None,
                  n_threads: Optional[int] = None,
                  keep_samples=None,
                  accumulators: Optional[dict] = None):
         if n_threads is None:
-            n_threads = multiprocessing.cpu_count() // 4
-        if seed is None:
-            seed = np.random.SeedSequence()
-        elif isinstance(seed, int):
-            seed = np.random.SeedSequence(seed)
-        get_logger().info('Seeding bootstrap RNG with %s', seed.entropy)
-        self._rngs = [np.random.default_rng(s) for s in seed.spawn(n_threads)]
+            n_threads = max(multiprocessing.cpu_count(), 4)
+        self._rngs = make_rngs(seed, n=n_threads)
 
         self._samplers = samplers
         self._keep_samples = set() if not keep_samples else set(keep_samples)

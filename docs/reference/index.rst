@@ -16,3 +16,14 @@ Main classes
 
    mc.VarianceAccum
    mc.CovarianceAccum
+
+
+Functions
+~~~~~~~~~
+
+.. autosummary::
+   :toctree: ../generated/classes
+   :template: scipp-function-template.rst
+   :recursive:
+
+   mc.driver.make_rngs
