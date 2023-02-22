@@ -7,7 +7,7 @@ import scipp_uncertainty
 sys.path.insert(0, os.path.abspath('.'))
 
 # General information about the project.
-project = 'scipp-uncertainty'
+project = 'scippuncertainty'
 copyright = '2023 Scipp contributors'
 author = 'Scipp contributors'
 
@@ -110,7 +110,7 @@ html_theme_options = {
     "show_toc_level": 2,  # Show subheadings in secondary sidebar
 }
 
-html_title = "Scipp-Uncertainty"
+html_title = "ScippUncertainty"
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.ico"
 
@@ -150,5 +150,4 @@ linkcheck_ignore = [
 
 # -- Options for bibtex ---------------------------------------------------
 bibtex_bibfiles = ['bibliography.bib']
-# bibtex_default_style = 'plain'
 bibtex_reference_style = 'label'

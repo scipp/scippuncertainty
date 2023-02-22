@@ -1,5 +1,5 @@
-API reference
-=============
+Reference
+=========
 
 Classes
 -------
@@ -13,3 +13,6 @@ Main classes
    :toctree: ../generated/classes
    :template: scipp-class-template.rst
    :recursive:
+
+   mc.VarianceAccum
+   mc.CovarianceAccum

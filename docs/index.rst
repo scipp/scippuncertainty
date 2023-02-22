@@ -5,3 +5,4 @@ Scipp-Uncertainty
    :hidden:
 
    reference/index
+   references

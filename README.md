@@ -1,2 +1,2 @@
-# scipp-uncertainty
+# ScippUncertainty
 Advanced uncertainty propagation with Scipp
