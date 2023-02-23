@@ -23,14 +23,33 @@ def test_variance_accum_returns_single_sample():
 def test_variance_accum_returns_expected_result():
     rng = np.random.default_rng(912)
     da = sc.DataArray(
-        sc.array(dims=['dummy', 'p'], values=rng.normal(0.0, 1.0, (15, 7))))
+        sc.array(dims=['observation', 'p'],
+                 values=rng.normal(0.0, 1.0, (15, 7))))
 
     accum = VarianceAccum()
     for i in range(15):
-        accum.add(da['dummy', i])
+        accum.add(da['observation', i])
 
     res = accum.get()
-    np.testing.assert_allclose(res.values, sc.mean(da, dim='dummy').values)
+    np.testing.assert_allclose(res.values,
+                               sc.mean(da, dim='observation').values)
+    np.testing.assert_allclose(res.variances, np.var(da.values, axis=0,
+                                                     ddof=1))
+
+
+def test_variance_accum_returns_expected_result_2d():
+    rng = np.random.default_rng(8341)
+    da = sc.DataArray(
+        sc.array(dims=['observation', 'a', 'b'],
+                 values=rng.normal(0.0, 1.0, (11, 3, 4))))
+
+    accum = VarianceAccum()
+    for i in range(11):
+        accum.add(da['observation', i])
+
+    res = accum.get()
+    np.testing.assert_allclose(res.values,
+                               sc.mean(da, dim='observation').values)
     np.testing.assert_allclose(res.variances, np.var(da.values, axis=0,
                                                      ddof=1))
 
