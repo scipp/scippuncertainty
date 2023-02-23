@@ -4,9 +4,11 @@
 
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Union
+from itertools import islice
+from typing import Dict, Generator, List, Optional, Union
 
 import numpy as np
+import scipp as sc
 from rich.console import Group
 from rich.live import Live
 from rich.progress import (
@@ -19,6 +21,7 @@ from rich.progress import (
 
 from ..random import make_rngs
 from .accumulator import VarianceAccum
+from .sampler import Sampler
 
 
 def _n_samples_per_thread(n_samples, n_thread):
@@ -115,3 +118,30 @@ class Bootstrap:
             for a, b in zip(accumulators.values(), res.result().values()):
                 a.add_from(b)
         return {name: accum.get() for name, accum in accumulators.items()}
+
+
+def _resample_once(samplers: Dict[str, Sampler],
+                   rng: np.random.Generator) -> Dict[str, sc.DataArray]:
+    return {key: sampler.sample_once(rng) for key, sampler in samplers.items()}
+
+
+def resample(
+    *, samplers: Dict[str, Sampler], rng: np.random.Generator
+) -> Generator[Dict[str, sc.DataArray], None, None]:
+    while True:
+        yield _resample_once(samplers, rng)
+
+
+def resample_n(
+    *,
+    samplers: Dict[str, Sampler],
+    rng: np.random.Generator,
+    n: int,
+    progress: Progress,
+    description: str = 'Monte-Carlo'
+) -> Generator[Dict[str, sc.DataArray], None, None]:
+    yield from progress.track(islice(resample(samplers=samplers, rng=rng), n),
+                              total=n,
+                              description=description)
+    p = Progress()
+    p.track
