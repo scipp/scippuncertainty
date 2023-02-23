@@ -3,7 +3,7 @@
 """Compute desired statistics on processed data."""
 from __future__ import annotations
 
-from typing import Protocol
+from typing import List, Optional, Protocol, Tuple
 
 import scipp as sc
 
@@ -82,10 +82,10 @@ class VarianceAccum:
 
         res = mean
         res.variances = var.values
-        res.attrs['n_samples'] = sc.scalar(self._n_samples)
+        res.attrs['n_samples'] = sc.index(self._n_samples)
         if self._samples is not None:
             res.attrs['samples'] = sc.index(
-                sc.concat(self._samples, 'bootstrap'))
+                sc.concat(self._samples, 'monte_carlo'))
         return res
 
 
@@ -101,21 +101,27 @@ class CovarianceAccum:
     # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Covariance
     # In particular the 'Online' section.
 
-    def __init__(self, *, keep_samples: bool = False) -> None:
+    def __init__(self,
+                 *,
+                 keep_samples: bool = False,
+                 dims: Optional[List[str], Tuple[str, str]] = None) -> None:
         if keep_samples:
             raise NotImplementedError(
                 'CovarianceAccum does not support keeping samples')
         self._mean = None
         self._c = None
         self._n_samples = 0
+        self._dims = ('dim_0', 'dim_1') if dims is None else tuple(dims)
 
     def add(self, sample: sc.DataArray) -> None:
         """Register a single sample."""
         if sample.ndim != 1:
             raise sc.DimensionError('Can only handle 1-d values')
-        sample = sample.rename({sample.dims[0]: 'dim0'})
+        sample = sample.rename({sample.dims[0]: self._dims[0]})
         for key in list(sample.coords):
             del sample.coords[key]
+        for key in list(sample.masks):
+            del sample.masks[key]
         for key in list(sample.attrs):
             del sample.attrs[key]
 
@@ -123,14 +129,15 @@ class CovarianceAccum:
         if self._mean is None:
             self._mean = sample.copy()
             self._c = sc.zeros(sizes={
-                'dim0': sample.shape[0],
-                'dim1': sample.shape[0]
+                self._dims[0]: sample.shape[0],
+                self._dims[1]: sample.shape[0]
             },
                                unit=sample.unit**2)
         else:
             delta_old = sample - self._mean
             self._mean += delta_old / self._n_samples
-            delta_new = (sample - self._mean).rename(dim0='dim1')
+            delta_new = (sample - self._mean).rename(
+                {self._dims[0]: self._dims[1]})
             self._c += delta_old * delta_new
 
     def add_from(self, other: CovarianceAccum) -> None:
@@ -141,8 +148,8 @@ class CovarianceAccum:
         else:
             n = self._n_samples + other._n_samples
             self._c += other._c + (self._n_samples * other._n_samples / n) * (
-                self._mean - other._mean) * (self._mean -
-                                             other._mean).rename(dim0='dim1')
+                self._mean - other._mean) * (self._mean - other._mean).rename(
+                    {self._dims[0]: self._dims[1]})
             self._mean = self._mean * (self._n_samples / n) + other._mean * (
                 other._n_samples / n)
         self._n_samples += other._n_samples
