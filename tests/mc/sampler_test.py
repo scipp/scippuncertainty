@@ -68,6 +68,78 @@ def test_dense_samplers_reproduce_input_metadata(sampler_type):
     assert sc.identical(sample.attrs['c'], da.attrs['c'])
 
 
+@pytest.mark.parametrize('sampler_type',
+                         [PoissonDenseSampler, NormalDenseSampler])
+def test_dense_samplers_copy_results(sampler_type):
+    rng = np.random.default_rng(2241)
+    da = sc.DataArray(
+        sc.array(dims=['xx'],
+                 values=rng.uniform(0.0, 1.0, 100),
+                 variances=rng.uniform(0.001, 0.1, 100)))
+    sampler = sampler_type(da)
+
+    sample0 = sampler.sample_once(rng)
+    sample0_copy = sample0.copy(deep=True)
+    sample1 = sampler.sample_once(rng)
+    # sample0 has not been overwritten
+    assert sc.identical(sample0, sample0_copy)
+    # a new sample has been produced
+    assert not sc.identical(sample1, sample0)
+
+
+@pytest.mark.parametrize('sampler_type',
+                         [PoissonDenseSampler, NormalDenseSampler])
+def test_dense_samplers_disable_copy(sampler_type):
+    rng = np.random.default_rng(561)
+    da = sc.DataArray(
+        sc.array(dims=['xx'],
+                 values=rng.uniform(0.0, 1.0, 100),
+                 variances=rng.uniform(0.001, 0.1, 100)))
+    sampler = sampler_type(da, copy=False)
+
+    sample0 = sampler.sample_once(rng)
+    sample0_copy = sample0.copy(deep=True)
+    sample1 = sampler.sample_once(rng)
+    # sample0 has been overwritten
+    assert not sc.identical(sample0, sample0_copy)
+    assert sc.identical(sample0, sample1)
+    # a new sample has been produced
+    assert not sc.identical(sample1, sample0_copy)
+
+
+@pytest.mark.parametrize('sampler_type',
+                         [PoissonDenseSampler, NormalDenseSampler])
+def test_dense_samplers_copy_input(sampler_type):
+    rng = np.random.default_rng(2241)
+    da = sc.DataArray(
+        sc.array(dims=['xx'],
+                 values=rng.uniform(0.0, 1.0, 100),
+                 variances=rng.uniform(0.001, 0.1, 100)))
+    sampler = sampler_type(da)
+    orig = da.copy()
+    da.values += 100
+    samples = np.stack([sampler.sample_once(rng).values for _ in range(1000)])
+
+    mean = np.mean(samples, axis=0)
+    np.testing.assert_allclose(mean, orig.values, atol=0.2)
+
+
+@pytest.mark.parametrize('sampler_type',
+                         [PoissonDenseSampler, NormalDenseSampler])
+def test_dense_samplers_disable_input_copy(sampler_type):
+    rng = np.random.default_rng(512)
+    da = sc.DataArray(
+        sc.array(dims=['xx'],
+                 values=rng.uniform(0.0, 1.0, 100),
+                 variances=rng.uniform(0.001, 0.1, 100)))
+    sampler = sampler_type(da, copy_in=False)
+    da.values += 100
+    samples = np.stack([sampler.sample_once(rng).values for _ in range(1000)])
+
+    mean = np.mean(samples, axis=0)
+    np.testing.assert_allclose(mean, da.values, atol=1)
+
+
 def test_normal_dense_sampler_produces_expected_values():
     rng = np.random.default_rng(51232)
     da = sc.DataArray(
