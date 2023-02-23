@@ -38,7 +38,8 @@ class PoissonDenseSampler:
     def __init__(self, data: sc.DataArray) -> None:
         self._base_hist = data
         self._result_buffer = sc.empty_like(data)
-        self._result_buffer.variances = None
+        if data.dtype in ('float64', 'float32'):
+            self._result_buffer.variances = None
 
     def sample_once(self, rng: np.random.Generator) -> sc.DataArray:
         """Return a new sample."""
