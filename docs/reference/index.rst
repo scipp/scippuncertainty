@@ -1,29 +1,15 @@
 Reference
 =========
 
-Classes
--------
+Monte-Carlo
+-----------
 
-.. currentmodule:: scipp_uncertainty
-
-Main classes
-~~~~~~~~~~~~
+.. currentmodule:: scipp_uncertainty.mc
 
 .. autosummary::
-   :toctree: ../generated/classes
-   :template: scipp-class-template.rst
+   :toctree: ../generated/modules
+   :template: scipp-module-template.rst
    :recursive:
 
-   mc.VarianceAccum
-   mc.CovarianceAccum
-
-
-Functions
-~~~~~~~~~
-
-.. autosummary::
-   :toctree: ../generated/classes
-   :template: scipp-function-template.rst
-   :recursive:
-
-   mc.driver.make_rngs
+   accumulator
+   sampler

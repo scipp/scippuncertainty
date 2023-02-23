@@ -22,9 +22,19 @@ class Accumulator(Protocol):
 
 
 class VarianceAccum:
-    """Compute the mean and variance of bootstrap samples.
+    r"""Compute the mean and variance of bootstrap samples.
 
-    Variances are computed using an algorithm based on :cite:`welford:1962`
+    The mean :math:`\mu_i` and variance :math:`\sigma_i^2` for array element
+    :math:`i` are defined as
+
+    .. math::
+
+        \mu_i &= \frac{1}{N} \sum_{s=1}^{N} x_{i s} \\
+        \sigma_i^2 &= \frac{1}{N-1} \sum_{s=1}^{N} (x_{i s} - \mu_i)^2, \\
+
+    where the sums run over the Monte-Carlo samples.
+
+    The computation of variances uses an algorithm based on :cite:`welford:1962`
     and :cite:`chan:1982`. This reduces the risk of catastrophic cancellations
     from sums of squares compared to a naive implementation.
     """
@@ -35,6 +45,14 @@ class VarianceAccum:
     # 'parallel algorithm'.
 
     def __init__(self, *, keep_samples: bool = False) -> None:
+        """Initialize a CovarianceAccum instance.
+
+        Parameters
+        ----------
+        keep_samples:
+            If ``True``, all samples are kept and returned as an attribute called
+            ``samples`` with dimension ``monte_carlo``.
+        """
         self._mean = None
         self._m2_dist = None
         self._n_samples = 0
@@ -90,11 +108,28 @@ class VarianceAccum:
 
 
 class CovarianceAccum:
-    """Compute the covariance matrix of a 1d array with itself.
+    r"""Compute the covariance matrix of a 1d array with itself.
 
-    Covariances are computed using an algorithm based on :cite:`schubert:2018`.
-    This reduces the risk of catastrophic cancellations
-    from sums of squares compared to a naive implementation.
+    The covariance :math:`\Sigma_{ij}^2` of array element :math:`i`
+    with element :math:`j` is defined as
+
+    .. math::
+
+        \Sigma_{ij}^2 = \frac{1}{N-1} \sum_{s=1}^N (x_{i s} - \mu_i)
+          (x_{j s} - \mu_j)
+
+    where the sums run over the Monte-Carlo samples and :math:`\mu_i` is the
+    mean of element :math:`i`.
+
+    The computation uses an algorithm based on :cite:`schubert:2018` which
+    reduces the risk of catastrophic cancellations from sums of squares
+    compared to a naive implementation.
+
+    The covariance matrix is encoded as the values of a 2d data array.
+    Dimensions are named ``dim_0`` and ``dim_1`` by default, but this can be
+    customized using the ``dims`` argument.
+    The returned data array does not have any coordinates, attributes, or masks
+    (except for an attribute ``n-samples``).
     """
 
     # See also the article on Wikipedia for an overview:
@@ -105,6 +140,17 @@ class CovarianceAccum:
                  *,
                  keep_samples: bool = False,
                  dims: Optional[List[str], Tuple[str, str]] = None) -> None:
+        """Initialize a CovarianceAccum instance.
+
+        Parameters
+        ----------
+        keep_samples:
+            Must be ``False``.
+            Only provided for parity with ``VarianceAccum``.
+        dims:
+            Dimension names for the covariance matrix.
+            Must be length-2.
+        """
         if keep_samples:
             raise NotImplementedError(
                 'CovarianceAccum does not support keeping samples')
