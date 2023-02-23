@@ -153,7 +153,7 @@ def test_normal_dense_sampler_produces_expected_values():
     mean = np.mean(samples, axis=0)
     np.testing.assert_allclose(mean, da.values, atol=0.01)
 
-    var = np.var(samples, axis=0)
+    var = np.var(samples, axis=0, ddof=1)
     np.testing.assert_allclose(var, da.variances, atol=0.01)
 
 
