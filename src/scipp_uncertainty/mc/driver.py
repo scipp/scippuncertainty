@@ -9,16 +9,8 @@ from typing import Dict, Generator, List, Optional, Union
 
 import numpy as np
 import scipp as sc
-from rich.console import Group
-from rich.live import Live
-from rich.progress import (
-    BarColumn,
-    Progress,
-    TextColumn,
-    TimeElapsedColumn,
-    TimeRemainingColumn,
-)
 
+from .._progress import Progress, SilentProgress, progress_bars
 from ..random import make_rngs
 from .accumulator import VarianceAccum
 from .sampler import Sampler
@@ -32,18 +24,6 @@ def _n_samples_per_thread(n_samples, n_thread):
         # This should not happen, only an internal debug check
         raise RuntimeError('Cannot distribute samples over threads')
     return base
-
-
-def _make_progress_bars(n):
-    return [
-        Progress(
-            TextColumn("{task.description}"),
-            BarColumn(),
-            TimeElapsedColumn(),
-            TextColumn("ETA:"),
-            TimeRemainingColumn(),
-        ) for _ in range(n)
-    ]
 
 
 class Bootstrap:
@@ -99,13 +79,12 @@ class Bootstrap:
     def run(self, fn, *, n_samples):
         """Run resampling."""
         results = []
-        progress_bars = _make_progress_bars(len(self._rngs))
-        with Live(Group(*progress_bars)):
+        with progress_bars(visible=None).prepare(len(self._rngs)) as prog:
             with ThreadPoolExecutor(max_workers=len(self._rngs)) as executor:
                 for rng, n_thread_samples, progress_bar in zip(
                         self._rngs,
                         _n_samples_per_thread(n_samples, len(self._rngs)),
-                        progress_bars):
+                        prog):
                     results.append(
                         executor.submit(self._run_batch,
                                         fn,
@@ -128,6 +107,7 @@ def _resample_once(samplers: Dict[str, Sampler],
 def resample(
     *, samplers: Dict[str, Sampler], rng: np.random.Generator
 ) -> Generator[Dict[str, sc.DataArray], None, None]:
+    """Draw samples from given samplers forever."""
     while True:
         yield _resample_once(samplers, rng)
 
@@ -137,11 +117,39 @@ def resample_n(
     samplers: Dict[str, Sampler],
     rng: np.random.Generator,
     n: int,
-    progress: Progress,
+    progress: Optional[Progress] = None,
     description: str = 'Monte-Carlo'
 ) -> Generator[Dict[str, sc.DataArray], None, None]:
+    """Draw n samples.
+
+    Passes the RNG to samplers in the following order:
+
+    .. code:: python
+
+        for _ in range(n):
+            for sampler in samplers.values():
+                sampler.sample_once(rng)
+
+    Parameters
+    ----------
+    samplers:
+        dict of samplers to draw from.
+    rng:
+        Random number generator to pass to the samplers.
+    n:
+        Number of samples to draw from each sampler.
+    progress:
+        Progress bar. Disabled if set to ``None``.
+    description:
+        Message to show on the progress bar.
+
+    Yields
+    ------
+    :
+        dicts of samples indexed by the keys of ``samplers``.
+    """
+    if progress is None:
+        progress = SilentProgress()
     yield from progress.track(islice(resample(samplers=samplers, rng=rng), n),
                               total=n,
                               description=description)
-    p = Progress()
-    p.track
