@@ -138,22 +138,15 @@ class CovarianceAccum:
 
     def __init__(self,
                  *,
-                 keep_samples: bool = False,
                  dims: Optional[List[str], Tuple[str, str]] = None) -> None:
         """Initialize a CovarianceAccum instance.
 
         Parameters
         ----------
-        keep_samples:
-            Must be ``False``.
-            Only provided for parity with ``VarianceAccum``.
         dims:
             Dimension names for the covariance matrix.
             Must be length-2.
         """
-        if keep_samples:
-            raise NotImplementedError(
-                'CovarianceAccum does not support keeping samples')
         self._mean = None
         self._c = None
         self._n_samples = 0
