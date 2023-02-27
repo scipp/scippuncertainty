@@ -3,9 +3,11 @@
 """Compute desired statistics on processed data."""
 from __future__ import annotations
 
-from typing import List, Optional, Protocol, Tuple
+from typing import List, Optional, Protocol, Tuple, TypeVar
 
 import scipp as sc
+
+A = TypeVar('A', bound='Accumulator')
 
 
 class Accumulator(Protocol):
@@ -14,7 +16,7 @@ class Accumulator(Protocol):
     def add(self, sample: sc.DataArray) -> None:
         """Register a single sample."""
 
-    def add_from(self, other: Accumulator) -> None:
+    def add_from(self: A, other: A) -> None:
         """Merge results from ``other`` into ``self``."""
 
     def get(self) -> sc.DataArray:
