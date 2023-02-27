@@ -3,7 +3,7 @@
 """Compute desired statistics on processed data."""
 from __future__ import annotations
 
-from typing import List, Optional, Protocol, Tuple, TypeVar
+from typing import List, Optional, Protocol, Tuple, TypeVar, Union
 
 import scipp as sc
 
@@ -55,10 +55,11 @@ class VarianceAccum:
             If ``True``, all samples are kept and returned as an attribute called
             ``samples`` with dimension ``monte_carlo``.
         """
-        self._mean = None
-        self._m2_dist = None
+        self._mean: Optional[sc.DataArray] = None
+        self._m2_dist: Optional[sc.Variable] = None
         self._n_samples = 0
-        self._samples = [] if keep_samples else None
+        self._samples: Optional[List[
+            sc.DataArray]] = [] if keep_samples else None
 
     def add(self, sample: sc.DataArray) -> None:
         """Register a single sample."""
@@ -138,9 +139,10 @@ class CovarianceAccum:
     # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Covariance
     # In particular the 'Online' section.
 
-    def __init__(self,
-                 *,
-                 dims: Optional[List[str], Tuple[str, str]] = None) -> None:
+    def __init__(
+            self,
+            *,
+            dims: Optional[Union[List[str], Tuple[str, str]]] = None) -> None:
         """Initialize a CovarianceAccum instance.
 
         Parameters

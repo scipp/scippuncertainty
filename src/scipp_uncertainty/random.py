@@ -58,13 +58,21 @@ def make_rngs(seed: Optional[Union[np.random.Generator,
         get_logger().info('Using %d provided random generators', n)
         return seed
 
-    if seed is None:
-        seed = np.random.SeedSequence()
-    elif not isinstance(seed, np.random.SeedSequence):
-        seed = np.random.SeedSequence(seed)
+    seed = _make_seed_sequence(seed)
     rngs = [np.random.default_rng(s) for s in seed.spawn(n)]
     get_logger().info(
         'Seeding %d random generators with entropy %s.\n'
         'The generators are of type %s from numpy.random version %s', n,
         seed.entropy, rngs[0], np.__version__)
     return rngs
+
+
+def _make_seed_sequence(
+    seed: Optional[Union[int, List[int], np.random.SeedSequence]]
+) -> np.random.SeedSequence:
+
+    if seed is None:
+        return np.random.SeedSequence()
+    if not isinstance(seed, np.random.SeedSequence):
+        return np.random.SeedSequence(seed)
+    return seed

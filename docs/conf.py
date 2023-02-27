@@ -52,7 +52,6 @@ napoleon_numpy_docstring = True
 napoleon_use_param = True
 napoleon_use_rtype = False
 napoleon_preprocess_types = True
-napoleon_type_aliases = {}
 typehints_defaults = "comma"
 typehints_use_rtype = False
 
