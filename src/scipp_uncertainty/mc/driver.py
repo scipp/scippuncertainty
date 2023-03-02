@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
-from itertools import islice, starmap
+from itertools import islice
 from typing import Callable, Dict, Generator, List, Optional, Union
 
 import numpy as np
@@ -131,11 +131,6 @@ def run(
     return {name: accum.get() for name, accum in accumulators.items()}
 
 
-# TODO
-# - clone samplers per thread to make sure buffers don't clash
-# - pass accumulator instances and create new instances for each thread
-
-
 class _Job:
     def __init__(
         self,
@@ -164,16 +159,14 @@ class _Job:
         *,
         n_samples: int,
     ) -> Dict[str, Accumulator]:
-        for samples in starmap(
-            fn,
-            resample_n(
-                samplers=self._samplers,
-                rng=self._rng,
-                n=n_samples,
-                progress=self._progress_bar,
-                description=self._description,
-            ),
+        for inputs in resample_n(
+            samplers=self._samplers,
+            rng=self._rng,
+            n=n_samples,
+            progress=self._progress_bar,
+            description=self._description,
         ):
+            samples = fn(**inputs)
             if samples is SkipSample:
                 continue
             for n, r in samples.items():
