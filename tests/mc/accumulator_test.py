@@ -2,6 +2,7 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 
 import numpy as np
+import pytest
 import scipp as sc
 
 from scipp_uncertainty.mc import CovarianceAccum, VarianceAccum
@@ -139,6 +140,32 @@ def test_variance_accum_add_from():
     np.testing.assert_allclose(a.variances, b.variances)
 
 
+def test_variance_accum_new_does_not_return_stored_samples():
+    da = sc.DataArray(
+        sc.arange("u", 3.0, unit="s"), coords={"o": sc.arange("u", 3) * 0.1}
+    )
+
+    accum = VarianceAccum()
+    accum.add(da)
+
+    new = accum.new()
+    with pytest.raises(RuntimeError):
+        new.get()  # has no samples to get
+
+
+@pytest.mark.parametrize("keep_samples", (True, False))
+def test_variance_accum_new_passes_keep_samples_along(keep_samples):
+    da = sc.DataArray(
+        sc.arange("u", 3.0, unit="s"), coords={"o": sc.arange("u", 3) * 0.1}
+    )
+
+    accum = VarianceAccum(keep_samples=keep_samples)
+    new = accum.new()
+    new.add(da)
+
+    assert ("samples" in new.get().attrs) == keep_samples
+
+
 def test_covariance_accum_returns_expected_result():
     rng = np.random.default_rng(512)
     da = sc.DataArray(
@@ -153,6 +180,18 @@ def test_covariance_accum_returns_expected_result():
     expected = np.cov(da.values)
     np.testing.assert_allclose(res.values, expected)
     assert res.variances is None
+
+
+def test_covariance_accum_returns_expected_result_1_sample():
+    rng = np.random.default_rng(32)
+    da = sc.DataArray(sc.array(dims=["variable"], values=rng.normal(0.0, 1.0, 6)))
+
+    accum = CovarianceAccum()
+    accum.add(da)
+
+    res = accum.get()
+    assert sc.all(sc.isnan(res)).value
+    assert res.attrs["n_samples"] == sc.index(1)
 
 
 def test_covariance_accum_returns_number_of_samples():
@@ -218,3 +257,27 @@ def test_covariance_accum_add_from():
     a = accum0.get()
     b = accum_total.get()
     np.testing.assert_allclose(a.values, b.values)
+
+
+def test_covariance_accum_new_does_not_return_stored_samples():
+    rng = np.random.default_rng(412)
+    da = sc.DataArray(sc.array(dims=["variable"], values=rng.normal(0.0, 1.0, 7)))
+    accum = CovarianceAccum()
+    accum.add(da)
+
+    new = accum.new()
+    with pytest.raises(RuntimeError):
+        new.get()  # has no samples to get
+
+
+@pytest.mark.parametrize("dims", (None, ("x", "y")))
+def test_covariance_accum_new_passes_dims_along(dims):
+    rng = np.random.default_rng(9)
+    da = sc.DataArray(sc.array(dims=["variable"], values=rng.normal(0.0, 1.0, 8)))
+    accum = CovarianceAccum(dims=dims)
+    new = accum.new()
+
+    accum.add(da)
+    new.add(da)
+
+    assert accum.get().dims == new.get().dims

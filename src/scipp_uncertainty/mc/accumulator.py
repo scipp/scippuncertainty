@@ -22,6 +22,12 @@ class Accumulator(Protocol):
     def get(self) -> sc.DataArray:
         """Return the current result."""
 
+    def new(self: A) -> A:
+        """Return a new accumulator of the same type as ``self``.
+
+        The new instance does not contain any samples even if ``self`` does.
+        """
+
 
 class VarianceAccum:
     r"""Compute the mean and variance of bootstrap samples.
@@ -112,6 +118,13 @@ class VarianceAccum:
         if self._samples is not None:
             res.attrs["samples"] = sc.index(sc.concat(self._samples, "monte_carlo"))
         return res
+
+    def new(self) -> VarianceAccum:
+        """Return a new VarianceAccum.
+
+        The new instance does not contain any samples even if ``self`` does.
+        """
+        return VarianceAccum(keep_samples=self._samples is not None)
 
 
 class CovarianceAccum:
@@ -204,5 +217,20 @@ class CovarianceAccum:
         if self._n_samples == 0:
             raise RuntimeError("There are not results to get.")
         cov = self._c / (self._n_samples - 1)
+        if isinstance(cov, sc.Variable):
+            # This happens when there is only 1 sample.
+            cov = sc.DataArray(
+                cov,
+                coords=self._mean.coords,
+                attrs=self._mean.attrs,
+                masks=self._mean.masks,
+            )
         cov.attrs["n_samples"] = sc.index(self._n_samples)
         return cov
+
+    def new(self) -> CovarianceAccum:
+        """Return a new CovarianceAccum.
+
+        The new instance does not contain any samples even if ``self`` does.
+        """
+        return CovarianceAccum(dims=self._dims)
