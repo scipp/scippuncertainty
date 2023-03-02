@@ -1,11 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Data (re-)sampling."""
-
-from typing import Protocol
+from __future__ import annotations
+from typing import Protocol, TypeVar
 
 import numpy as np
 import scipp as sc
+
+
+S = TypeVar('S', bound='Sampler')
 
 
 class Sampler(Protocol):
@@ -23,6 +26,12 @@ class Sampler(Protocol):
         -------
         :
             A new sample.
+        """
+
+    def clone(self:S) -> S:
+        """Return a new sampler of the same type.
+
+        The returned sampler is independent of ``self`` and samples from the same data.
         """
 
 
@@ -66,6 +75,14 @@ class PoissonDenseSampler:
         return self._result_buffer.copy(
         ) if self._copy else self._result_buffer
 
+    def clone(self) -> PoissonDenseSampler:
+        """Return a new PoissonDenseSampler.
+
+        The returned sampler is independent of ``self`` and samples from the same data.
+        """
+        return PoissonDenseSampler(self._base_hist, copy_in=True, copy=self._copy)
+
+
 
 class NormalDenseSampler:
     """Resample dense data from a Normal distribution.
@@ -108,3 +125,10 @@ class NormalDenseSampler:
                                                 scale=self._stds)
         return self._result_buffer.copy(
         ) if self._copy else self._result_buffer
+
+    def clone(self) -> NormalDenseSampler:
+        """Return a new NormalDenseSampler.
+
+        The returned sampler is independent of ``self`` and samples from the same data.
+        """
+        return NormalDenseSampler(self._base_hist, copy_in=True, copy=self._copy)

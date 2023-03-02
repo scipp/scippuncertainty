@@ -169,3 +169,53 @@ def test_poisson_dense_sampler_produces_expected_values():
 
     var = np.mean(samples, axis=0)
     np.testing.assert_allclose(var, da.values, atol=0.2)
+
+
+@pytest.mark.parametrize('sampler_type',
+                         [PoissonDenseSampler, NormalDenseSampler])
+@pytest.mark.parametrize('copy_in', [True, False])
+def test_cloned_dense_sampler_produces_same_values_as_original(sampler_type, copy_in):
+    rng = np.random.default_rng(82646)
+    da = sc.DataArray(
+        sc.array(dims=['xx'],
+                 values=rng.uniform(0.0, 1.0, 100),
+                 variances=rng.uniform(0.001, 0.1, 100)))
+
+    orig_sampler = sampler_type(da, copy_in=copy_in)
+    cloned_sampler = orig_sampler.clone()
+
+    rng_orig = np.random.default_rng(41828)
+    rng_clone = np.random.default_rng(41828)
+    orig_sample0 = orig_sampler.sample_once(rng_orig)
+    cloned_sample0 = cloned_sampler.sample_once(rng_clone)
+    cloned_sample1 = cloned_sampler.sample_once(rng_clone)
+    orig_sample1 = orig_sampler.sample_once(rng_orig)
+
+    assert sc.identical(orig_sample0, cloned_sample0)
+    assert sc.identical(orig_sample1, cloned_sample1)
+
+@pytest.mark.parametrize('sampler_type',
+                         [PoissonDenseSampler, NormalDenseSampler])
+@pytest.mark.parametrize('copy_in', [True, False])
+@pytest.mark.parametrize('copy_out', [True, False])
+def test_cloned_dense_samplers_output_is_independent_of_orig(sampler_type, copy_in, copy_out):
+    # Data returned by the cloned sampler does not share memory with
+    # data returned by the original.
+    rng = np.random.default_rng(98283)
+    da = sc.DataArray(
+        sc.array(dims=['xx'],
+                 values=rng.uniform(2.0, 3.0, 69),
+                 variances=rng.uniform(0.01, 0.1, 69)))
+
+    orig_sampler = sampler_type(da, copy_in=copy_in, copy=copy_out)
+    cloned_sampler = orig_sampler.clone()
+
+    orig_sample = orig_sampler.sample_once(rng)
+    cloned_sample = cloned_sampler.sample_once(rng)
+
+    orig_sample_copy = orig_sample.copy(deep=True)
+    cloned_sample[4] = 6.412
+    cloned_sample.unit = 'kg'
+
+    assert not sc.identical(orig_sample, cloned_sample)
+    assert sc.identical(orig_sample, orig_sample_copy)
