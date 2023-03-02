@@ -9,13 +9,10 @@ repos:
     - id: detect-private-key
     - id: trailing-whitespace
       args: [--markdown-linebreak-ext=md]
-- repo: https://github.com/google/yapf
-  rev: v0.32.0
+- repo: https://github.com/psf/black
+  rev: 23.1.0
   hooks:
-    - id: yapf
-      args: [ "-i", "-r" ]
-      types: [ "python" ]
-      additional_dependencies: [ "toml" ]
+    - id: black
 - repo: https://github.com/kynan/nbstripout
   rev: 0.6.0
   hooks:
