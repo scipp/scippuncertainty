@@ -106,7 +106,51 @@ def run(
     progress: Optional[bool] = None,
     description: str = "Monte-Carlo",
 ) -> Dict[str, sc.DataArray]:
-    """TODO."""
+    """Propagate uncertainties using Monte-Carlo.
+
+    This function drives the propagation by drawing samples, calling the provided
+    function on each, anc accumulating the results.
+
+    Parameters
+    ----------
+    fn:
+        Function to perform the calculation that you want to
+        propagate uncertainties through.
+    n_samples:
+        Number of samples to draw in total.
+    samplers:
+        Dict of samplers to generate the input data.
+        Samples are passed to ``fn`` by keyword arguments according to the keys
+        in this dict.
+    accumulators:
+        Dict of accumulators for the results.
+        Each item in the output of ``fn`` is passed to the accumulator with the
+        same key.
+    n_threads:
+        Number of threads.
+        Defaults to a small number depending on the number of cores of your CPU.
+        ``run`` uses threads and is thus affected by the GIL.
+        Setting ``n_threads`` to something higher than 1 only makes sense if ``fn``
+        spends a significant amount of time in code that releases the GIL
+        (e.g. most functions in Scipp).
+    seed:
+        Used to seed one random number generator per thread.
+        See :func:`scipp_uncertainty.random.make_rngs` for details.
+    progress:
+        If ``True``, show progress bars in the terminal.
+        This requires the package ``rich``.
+        If ``False``, no progress is shown.
+        If ``None``, the default, progress bars are shown if and only if
+        ``rich`` is installed.
+    description:
+        Message to display in progress bars.
+
+    Returns
+    -------
+    :
+        Dict of results obtained from the accumulators.
+        It contains one item per accumulator with the same key.
+    """
     rngs = make_rngs(seed=seed, n=_pick_thread_count(n_threads))
     results = []
     with progress_bars(visible=progress).prepare(len(rngs)) as p_bars:

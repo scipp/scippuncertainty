@@ -14,3 +14,15 @@ Monte-Carlo
    accumulator
    driver
    sampler
+
+Common
+------
+
+.. currentmodule:: scipp_uncertainty
+
+.. autosummary::
+   :toctree: ../generated/modules
+   :template: scipp-module-template.rst
+   :recursive:
+
+   random
