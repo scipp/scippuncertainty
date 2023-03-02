@@ -9,10 +9,19 @@ import numpy as np
 from .logging import get_logger
 
 
-def make_rngs(seed: Optional[Union[np.random.Generator,
-                                   List[np.random.Generator], int, List[int],
-                                   np.random.SeedSequence]], *,
-              n: int) -> List[np.random.Generator]:
+def make_rngs(
+    seed: Optional[
+        Union[
+            np.random.Generator,
+            List[np.random.Generator],
+            int,
+            List[int],
+            np.random.SeedSequence,
+        ]
+    ],
+    *,
+    n: int,
+) -> List[np.random.Generator]:
     """Instantiate new random number generators.
 
     Creates the given number of random generators using
@@ -53,24 +62,28 @@ def make_rngs(seed: Optional[Union[np.random.Generator,
     if isinstance(seed, list) and isinstance(seed[0], np.random.Generator):
         if len(seed) != n:
             raise ValueError(
-                f'Got {len(seed)} random generators for {n} threads. '
-                'Need exactly one RNG per thread.')
-        get_logger().info('Using %d provided random generators', n)
+                f"Got {len(seed)} random generators for {n} threads. "
+                "Need exactly one RNG per thread."
+            )
+        get_logger().info("Using %d provided random generators", n)
         return seed
 
     seed = _make_seed_sequence(seed)
     rngs = [np.random.default_rng(s) for s in seed.spawn(n)]
     get_logger().info(
-        'Seeding %d random generators with entropy %s.\n'
-        'The generators are of type %s from numpy.random version %s', n,
-        seed.entropy, rngs[0], np.__version__)
+        "Seeding %d random generators with entropy %s.\n"
+        "The generators are of type %s from numpy.random version %s",
+        n,
+        seed.entropy,
+        rngs[0],
+        np.__version__,
+    )
     return rngs
 
 
 def _make_seed_sequence(
     seed: Optional[Union[int, List[int], np.random.SeedSequence]]
 ) -> np.random.SeedSequence:
-
     if seed is None:
         return np.random.SeedSequence()
     if not isinstance(seed, np.random.SeedSequence):

@@ -2,13 +2,13 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Data (re-)sampling."""
 from __future__ import annotations
+
 from typing import Protocol, TypeVar
 
 import numpy as np
 import scipp as sc
 
-
-S = TypeVar('S', bound='Sampler')
+S = TypeVar("S", bound="Sampler")
 
 
 class Sampler(Protocol):
@@ -28,7 +28,7 @@ class Sampler(Protocol):
             A new sample.
         """
 
-    def clone(self:S) -> S:
+    def clone(self: S) -> S:
         """Return a new sampler of the same type.
 
         The returned sampler is independent of ``self`` and samples from the same data.
@@ -44,10 +44,9 @@ class PoissonDenseSampler:
     The input data must be dense, i.e. not binned.
     """
 
-    def __init__(self,
-                 data: sc.DataArray,
-                 copy: bool = True,
-                 copy_in: bool = True) -> None:
+    def __init__(
+        self, data: sc.DataArray, copy: bool = True, copy_in: bool = True
+    ) -> None:
         """Initialize a PoissonDenseSampler.
 
         Parameters
@@ -65,15 +64,14 @@ class PoissonDenseSampler:
         """
         self._base_hist = data.copy() if copy_in else data
         self._result_buffer = sc.empty_like(data)
-        if data.dtype in ('float64', 'float32'):
+        if data.dtype in ("float64", "float32"):
             self._result_buffer.variances = None
         self._copy = copy
 
     def sample_once(self, rng: np.random.Generator) -> sc.DataArray:
         """Return a new sample."""
         self._result_buffer.values = rng.poisson(self._base_hist.values)
-        return self._result_buffer.copy(
-        ) if self._copy else self._result_buffer
+        return self._result_buffer.copy() if self._copy else self._result_buffer
 
     def clone(self) -> PoissonDenseSampler:
         """Return a new PoissonDenseSampler.
@@ -81,7 +79,6 @@ class PoissonDenseSampler:
         The returned sampler is independent of ``self`` and samples from the same data.
         """
         return PoissonDenseSampler(self._base_hist, copy_in=True, copy=self._copy)
-
 
 
 class NormalDenseSampler:
@@ -94,10 +91,9 @@ class NormalDenseSampler:
     The input data must be dense, i.e. not binned.
     """
 
-    def __init__(self,
-                 data: sc.DataArray,
-                 copy: bool = True,
-                 copy_in: bool = True) -> None:
+    def __init__(
+        self, data: sc.DataArray, copy: bool = True, copy_in: bool = True
+    ) -> None:
         """Initialize a NormalDenseSampler.
 
         Parameters
@@ -121,10 +117,10 @@ class NormalDenseSampler:
 
     def sample_once(self, rng: np.random.Generator) -> sc.DataArray:
         """Return a new sample."""
-        self._result_buffer.values = rng.normal(loc=self._base_hist.values,
-                                                scale=self._stds)
-        return self._result_buffer.copy(
-        ) if self._copy else self._result_buffer
+        self._result_buffer.values = rng.normal(
+            loc=self._base_hist.values, scale=self._stds
+        )
+        return self._result_buffer.copy() if self._copy else self._result_buffer
 
     def clone(self) -> NormalDenseSampler:
         """Return a new NormalDenseSampler.

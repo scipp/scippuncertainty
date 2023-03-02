@@ -6,8 +6,8 @@ import pytest
 from scipp_uncertainty._util import distribute_evenly
 
 
-@pytest.mark.parametrize('total', range(0, 30))
-@pytest.mark.parametrize('n_parts', range(1, 10))
+@pytest.mark.parametrize("total", range(0, 30))
+@pytest.mark.parametrize("n_parts", range(1, 10))
 def test_distribute_evenly(total: int, n_parts: int):
     parts = distribute_evenly(total, n_parts)
     assert sum(parts) == total

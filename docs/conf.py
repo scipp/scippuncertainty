@@ -4,12 +4,12 @@ import sys
 
 import scipp_uncertainty
 
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath("."))
 
 # General information about the project.
-project = 'scippuncertainty'
-copyright = '2023 Scipp contributors'
-author = 'Scipp contributors'
+project = "scippuncertainty"
+copyright = "2023 Scipp contributors"
+author = "Scipp contributors"
 
 html_show_sourcelink = True
 
@@ -37,9 +37,9 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'python': ('https://docs.python.org/3', None),
-    'scipp': ('https://scipp.github.io/', None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "python": ("https://docs.python.org/3", None),
+    "scipp": ("https://scipp.github.io/", None),
 }
 
 # autodocs includes everything, even irrelevant API internals. autosummary
@@ -98,7 +98,7 @@ pygments_style = "sphinx"
 todo_include_todos = False
 
 # -- Options for HTML output ----------------------------------------------
-html_theme = 'sphinx_book_theme'
+html_theme = "sphinx_book_theme"
 html_theme_options = {
     "logo_only": True,
     "repository_url": f"https://github.com/scipp/{project}",
@@ -136,10 +136,12 @@ htmlhelp_basename = "scippuncertaintydoc"
 doctest_global_setup = """
 """
 
-doctest_default_flags = (doctest.ELLIPSIS
-                         | doctest.IGNORE_EXCEPTION_DETAIL
-                         | doctest.DONT_ACCEPT_TRUE_FOR_1
-                         | doctest.NORMALIZE_WHITESPACE)
+doctest_default_flags = (
+    doctest.ELLIPSIS
+    | doctest.IGNORE_EXCEPTION_DETAIL
+    | doctest.DONT_ACCEPT_TRUE_FOR_1
+    | doctest.NORMALIZE_WHITESPACE
+)
 
 # -- Options for linkcheck ------------------------------------------------
 
@@ -149,5 +151,5 @@ linkcheck_ignore = [
 ]
 
 # -- Options for bibtex ---------------------------------------------------
-bibtex_bibfiles = ['bibliography.bib']
-bibtex_reference_style = 'label'
+bibtex_bibfiles = ["bibliography.bib"]
+bibtex_reference_style = "label"

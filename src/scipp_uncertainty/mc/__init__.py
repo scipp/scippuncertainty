@@ -12,13 +12,13 @@ from .driver import (
 from .sampler import NormalDenseSampler, PoissonDenseSampler, Sampler
 
 __all__ = [
-    'resample',
-    'resample_n',
-    'Accumulator',
-    'CovarianceAccum',
-    'VarianceAccum',
-    'Sampler',
-    'NormalDenseSampler',
-    'PoissonDenseSampler',
-    'SkipSample',
+    "resample",
+    "resample_n",
+    "Accumulator",
+    "CovarianceAccum",
+    "VarianceAccum",
+    "Sampler",
+    "NormalDenseSampler",
+    "PoissonDenseSampler",
+    "SkipSample",
 ]

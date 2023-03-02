@@ -7,7 +7,7 @@ from typing import List, Optional, Protocol, Tuple, TypeVar, Union
 
 import scipp as sc
 
-A = TypeVar('A', bound='Accumulator')
+A = TypeVar("A", bound="Accumulator")
 
 
 class Accumulator(Protocol):
@@ -58,8 +58,7 @@ class VarianceAccum:
         self._mean: Optional[sc.DataArray] = None
         self._m2_dist: Optional[sc.Variable] = None
         self._n_samples = 0
-        self._samples: Optional[List[
-            sc.DataArray]] = [] if keep_samples else None
+        self._samples: Optional[List[sc.DataArray]] = [] if keep_samples else None
 
     def add(self, sample: sc.DataArray) -> None:
         """Register a single sample."""
@@ -82,31 +81,36 @@ class VarianceAccum:
             self._m2_dist = other._m2_dist.copy()
         else:
             delta = other._mean - self._mean
-            self._m2_dist = (self._m2_dist + other._m2_dist +
-                             delta**2 * self._n_samples * other._n_samples /
-                             (self._n_samples + other._n_samples))
-            self._mean += delta * other._n_samples / (self._n_samples +
-                                                      other._n_samples)
+            self._m2_dist = (
+                self._m2_dist
+                + other._m2_dist
+                + delta**2
+                * self._n_samples
+                * other._n_samples
+                / (self._n_samples + other._n_samples)
+            )
+            self._mean += (
+                delta * other._n_samples / (self._n_samples + other._n_samples)
+            )
         self._n_samples += other._n_samples
 
         if (self._samples is None) ^ (other._samples is None):
-            raise RuntimeError('Both accumulators must have values')
+            raise RuntimeError("Both accumulators must have values")
         if self._samples is not None:
             self._samples.extend(other._samples)
 
     def get(self) -> sc.DataArray:
         """Return the current result."""
         if self._n_samples == 0:
-            raise RuntimeError('There are not results to get.')
+            raise RuntimeError("There are not results to get.")
         mean = self._mean
         var = self._m2_dist / (self._n_samples - 1)
 
         res = mean
         res.variances = var.values
-        res.attrs['n_samples'] = sc.index(self._n_samples)
+        res.attrs["n_samples"] = sc.index(self._n_samples)
         if self._samples is not None:
-            res.attrs['samples'] = sc.index(
-                sc.concat(self._samples, 'monte_carlo'))
+            res.attrs["samples"] = sc.index(sc.concat(self._samples, "monte_carlo"))
         return res
 
 
@@ -140,9 +144,8 @@ class CovarianceAccum:
     # In particular the 'Online' section.
 
     def __init__(
-            self,
-            *,
-            dims: Optional[Union[List[str], Tuple[str, str]]] = None) -> None:
+        self, *, dims: Optional[Union[List[str], Tuple[str, str]]] = None
+    ) -> None:
         """Initialize a CovarianceAccum instance.
 
         Parameters
@@ -154,12 +157,12 @@ class CovarianceAccum:
         self._mean = None
         self._c = None
         self._n_samples = 0
-        self._dims = ('dim_0', 'dim_1') if dims is None else tuple(dims)
+        self._dims = ("dim_0", "dim_1") if dims is None else tuple(dims)
 
     def add(self, sample: sc.DataArray) -> None:
         """Register a single sample."""
         if sample.ndim != 1:
-            raise sc.DimensionError('Can only handle 1-d values')
+            raise sc.DimensionError("Can only handle 1-d values")
         sample = sample.rename({sample.dims[0]: self._dims[0]})
         for key in list(sample.coords):
             del sample.coords[key]
@@ -171,16 +174,14 @@ class CovarianceAccum:
         self._n_samples += 1
         if self._mean is None:
             self._mean = sample.copy()
-            self._c = sc.zeros(sizes={
-                self._dims[0]: sample.shape[0],
-                self._dims[1]: sample.shape[0]
-            },
-                               unit=sample.unit**2)
+            self._c = sc.zeros(
+                sizes={self._dims[0]: sample.shape[0], self._dims[1]: sample.shape[0]},
+                unit=sample.unit**2,
+            )
         else:
             delta_old = sample - self._mean
             self._mean += delta_old / self._n_samples
-            delta_new = (sample - self._mean).rename(
-                {self._dims[0]: self._dims[1]})
+            delta_new = (sample - self._mean).rename({self._dims[0]: self._dims[1]})
             self._c += delta_old * delta_new
 
     def add_from(self, other: CovarianceAccum) -> None:
@@ -191,16 +192,17 @@ class CovarianceAccum:
         else:
             n = self._n_samples + other._n_samples
             self._c += other._c + (self._n_samples * other._n_samples / n) * (
-                self._mean - other._mean) * (self._mean - other._mean).rename(
-                    {self._dims[0]: self._dims[1]})
+                self._mean - other._mean
+            ) * (self._mean - other._mean).rename({self._dims[0]: self._dims[1]})
             self._mean = self._mean * (self._n_samples / n) + other._mean * (
-                other._n_samples / n)
+                other._n_samples / n
+            )
         self._n_samples += other._n_samples
 
     def get(self) -> sc.DataArray:
         """Return the current result."""
         if self._n_samples == 0:
-            raise RuntimeError('There are not results to get.')
+            raise RuntimeError("There are not results to get.")
         cov = self._c / (self._n_samples - 1)
-        cov.attrs['n_samples'] = sc.index(self._n_samples)
+        cov.attrs["n_samples"] = sc.index(self._n_samples)
         return cov

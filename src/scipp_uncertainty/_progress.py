@@ -15,7 +15,7 @@ from typing import (
     Union,
 )
 
-ProgressType = TypeVar('ProgressType')
+ProgressType = TypeVar("ProgressType")
 
 
 class Progress(Protocol):
@@ -24,10 +24,12 @@ class Progress(Protocol):
     Only works if the display has been initialized with ``MultiProgress.prepare``.
     """
 
-    def track(self,
-              sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
-              description: str,
-              total: Optional[float] = None) -> Iterable[ProgressType]:
+    def track(
+        self,
+        sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
+        description: str,
+        total: Optional[float] = None,
+    ) -> Iterable[ProgressType]:
         """Display and update a progress bar based on the provided sequence.
 
         Parameters
@@ -50,9 +52,11 @@ class SilentProgress:
     """'Progress bar' that shows nothing."""
 
     @staticmethod
-    def track(sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
-              description: str,
-              total: Optional[float] = None) -> Iterable[ProgressType]:
+    def track(
+        sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
+        description: str,
+        total: Optional[float] = None,
+    ) -> Iterable[ProgressType]:
         """Return the input sequence.
 
         Parameters
@@ -83,18 +87,22 @@ class RichProgress:
             TimeElapsedColumn,
             TimeRemainingColumn,
         )
+
         self._progress = rich.progress.Progress(
             TextColumn("{task.description}"),
             BarColumn(),
             TimeElapsedColumn(),
             TextColumn("ETA:"),
             TimeRemainingColumn(),
-            refresh_per_second=1)
+            refresh_per_second=1,
+        )
 
-    def track(self,
-              sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
-              description: str,
-              total: Optional[float] = None) -> Iterable[ProgressType]:
+    def track(
+        self,
+        sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
+        description: str,
+        total: Optional[float] = None,
+    ) -> Iterable[ProgressType]:
         """Display and update a progress bar based on the provided sequence.
 
         Parameters
@@ -111,10 +119,9 @@ class RichProgress:
         :
             An iterable over the same elements as ``sequence``.
         """
-        return self._progress.track(sequence,
-                                    total=total,
-                                    description=description,
-                                    update_period=1)
+        return self._progress.track(
+            sequence, total=total, description=description, update_period=1
+        )
 
     def underlying(self) -> Any:
         """Return the underlying rich progress bar."""
@@ -189,14 +196,14 @@ def progress_bars(visible: Optional[bool]) -> MultiProgress:
         If ``rich`` is not installed and ``visible is True``.
     """
     if visible is None:
-        return RichMultiProgress() if _rich_is_installed(
-        ) else SilentMultiProgress()
+        return RichMultiProgress() if _rich_is_installed() else SilentMultiProgress()
     if visible:
         if not _rich_is_installed():
             raise ImportError(
-                'Cannot show a progress bar because `rich` is not '
-                'available. Either switch off progress bars or install '
-                'rich with `pip install rich` or '
-                '`conda install -c conda-forge rich`.')
+                "Cannot show a progress bar because `rich` is not "
+                "available. Either switch off progress bars or install "
+                "rich with `pip install rich` or "
+                "`conda install -c conda-forge rich`."
+            )
         return RichMultiProgress()
     return SilentMultiProgress()

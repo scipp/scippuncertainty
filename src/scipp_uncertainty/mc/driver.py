@@ -28,8 +28,9 @@ def _pick_thread_count(n_threads: Optional[int]) -> int:
     return max(n_threads, 1)
 
 
-def _resample_once(samplers: Dict[str, Sampler],
-                   rng: np.random.Generator) -> Dict[str, sc.DataArray]:
+def _resample_once(
+    samplers: Dict[str, Sampler], rng: np.random.Generator
+) -> Dict[str, sc.DataArray]:
     return {key: sampler.sample_once(rng) for key, sampler in samplers.items()}
 
 
@@ -47,7 +48,7 @@ def resample_n(
     rng: np.random.Generator,
     n: int,
     progress: Optional[Progress] = None,
-    description: str = 'Monte-Carlo'
+    description: str = "Monte-Carlo",
 ) -> Generator[Dict[str, sc.DataArray], None, None]:
     """Draw n samples.
 
@@ -79,9 +80,11 @@ def resample_n(
     """
     if progress is None:
         progress = SilentProgress()
-    yield from progress.track(islice(resample(samplers=samplers, rng=rng), n),
-                              total=n,
-                              description=description)
+    yield from progress.track(
+        islice(resample(samplers=samplers, rng=rng), n),
+        total=n,
+        description=description,
+    )
 
 
 def run(
@@ -91,10 +94,17 @@ def run(
     samplers: Dict[str, Sampler],
     accumulators: Optional[Dict[str, Accumulator]] = None,
     n_threads: Optional[int] = None,
-    seed: Optional[Union[np.random.Generator, List[np.random.Generator], int,
-                         List[int], np.random.SeedSequence]] = None,
+    seed: Optional[
+        Union[
+            np.random.Generator,
+            List[np.random.Generator],
+            int,
+            List[int],
+            np.random.SeedSequence,
+        ]
+    ] = None,
     progress: Optional[bool] = None,
-    description: str = 'Monte-Carlo',
+    description: str = "Monte-Carlo",
 ) -> Dict[str, sc.DataArray]:
     """TODO."""
     rngs = make_rngs(seed=seed, n=_pick_thread_count(n_threads))
@@ -102,16 +112,17 @@ def run(
     with progress_bars(visible=progress).prepare(len(rngs)) as p_bars:
         with ThreadPoolExecutor(max_workers=len(rngs)) as executor:
             for i, (rng, n_thread_samples, progress_bar) in enumerate(
-                    zip(rngs, _n_samples_per_thread(n_samples, len(rngs)),
-                        p_bars)):
-                job = _Job(id_=i,
-                           base_samplers=samplers,
-                           base_accumulators=accumulators,
-                           rng=rng,
-                           progress_bar=progress_bar,
-                           description=description)
-                results.append(
-                    executor.submit(job, fn, n_samples=n_thread_samples))
+                zip(rngs, _n_samples_per_thread(n_samples, len(rngs)), p_bars)
+            ):
+                job = _Job(
+                    id_=i,
+                    base_samplers=samplers,
+                    base_accumulators=accumulators,
+                    rng=rng,
+                    progress_bar=progress_bar,
+                    description=description,
+                )
+                results.append(executor.submit(job, fn, n_samples=n_thread_samples))
 
     accumulators = results[0].result()
     for res in results[1:]:
@@ -126,34 +137,43 @@ def run(
 
 
 class _Job:
-
-    def __init__(self, *, id_: int, base_samplers: Dict[str, Sampler],
-                 base_accumulators: Dict[str, Accumulator],
-                 rng: np.random.Generator, progress_bar: Progress,
-                 description: str) -> None:
+    def __init__(
+        self,
+        *,
+        id_: int,
+        base_samplers: Dict[str, Sampler],
+        base_accumulators: Dict[str, Accumulator],
+        rng: np.random.Generator,
+        progress_bar: Progress,
+        description: str,
+    ) -> None:
         self._id = id_
         self._samplers = {
-            key: sampler.clone()
-            for key, sampler in base_samplers.items()
+            key: sampler.clone() for key, sampler in base_samplers.items()
         }
         self._accumulators = {
-            key: accum.new()
-            for key, accum in base_accumulators.items()
+            key: accum.new() for key, accum in base_accumulators.items()
         }
         self._rng = rng
         self._progress_bar = progress_bar
-        self._description = description + f'[{self._id}]'
+        self._description = description + f"[{self._id}]"
 
-    def __call__(self, fn: Callable[..., Union[Dict[str, sc.DataArray],
-                                               SkipSampleType]], *,
-                 n_samples: int) -> Dict[str, Accumulator]:
+    def __call__(
+        self,
+        fn: Callable[..., Union[Dict[str, sc.DataArray], SkipSampleType]],
+        *,
+        n_samples: int,
+    ) -> Dict[str, Accumulator]:
         for samples in starmap(
-                fn,
-                resample_n(samplers=self._samplers,
-                           rng=self._rng,
-                           n=n_samples,
-                           progress=self._progress_bar,
-                           description=self._description)):
+            fn,
+            resample_n(
+                samplers=self._samplers,
+                rng=self._rng,
+                n=n_samples,
+                progress=self._progress_bar,
+                description=self._description,
+            ),
+        ):
             if samples is SkipSample:
                 continue
             for n, r in samples.items():
