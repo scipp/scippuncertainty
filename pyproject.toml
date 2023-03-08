@@ -25,11 +25,15 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Typing :: Typed",
 ]
+dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
+    "numpy>=1.20",
     "scipp"
 ]
-dynamic = ["version"]
+
+[project.optional-dependencies]
+all = ["rich"]
 
 [project.urls]
 "Documentation" = "https://scipp.github.io/scipp-uncertainty"

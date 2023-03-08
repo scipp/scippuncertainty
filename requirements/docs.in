@@ -1,0 +1,11 @@
+-r base.in
+ipykernel
+ipython!=8.7.0  # Breaks syntax highlighting in Jupyter code cells.
+matplotlib
+nbsphinx
+plopp
+sphinx
+sphinx-autodoc-typehints==1.18.3  # later versions require sphinx >=5 which is incompatible with current sphinx-book-theme
+sphinx-book-theme
+sphinx-copybutton
+sphinxcontrib-bibtex
