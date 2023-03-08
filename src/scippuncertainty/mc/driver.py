@@ -135,7 +135,7 @@ def run(
         (e.g. most functions in Scipp).
     seed:
         Used to seed one random number generator per thread.
-        See :func:`scipp_uncertainty.random.make_rngs` for details.
+        See :func:`scippuncertainty.random.make_rngs` for details.
     progress:
         If ``True``, show progress bars in the terminal.
         This requires the package ``rich``.

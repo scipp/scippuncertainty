@@ -18,7 +18,7 @@ Monte-Carlo
 Common
 ------
 
-.. currentmodule:: scipp_uncertainty
+.. currentmodule:: scippuncertainty
 
 .. autosummary::
    :toctree: ../generated/modules
