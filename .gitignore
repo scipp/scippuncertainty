@@ -130,6 +130,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Ruff
+.ruff_cache
+
 # IDE settings
 .idea/
 .vscode/*
