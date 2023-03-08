@@ -7,7 +7,7 @@ import sphinx_book_theme
 from docutils.nodes import document
 from sphinx.application import Sphinx
 
-import scipp_uncertainty
+import scippuncertainty
 
 sys.path.insert(0, os.path.abspath("."))
 
@@ -21,7 +21,7 @@ copyright = "2023 Scipp contributors"
 author = "Scipp contributors"
 
 version_info = VersionInfo(repo=project)
-long_version = scipp_uncertainty.__version__
+long_version = scippuncertainty.__version__
 outdated = not version_info.is_latest(long_version)
 
 
@@ -179,9 +179,9 @@ master_doc = "index"
 # built documents.
 #
 # The short X.Y version.
-version = scipp_uncertainty.__version__
+version = scippuncertainty.__version__
 # The full version, including alpha/beta/rc tags.
-release = scipp_uncertainty.__version__
+release = scippuncertainty.__version__
 
 warning_is_error = True
 

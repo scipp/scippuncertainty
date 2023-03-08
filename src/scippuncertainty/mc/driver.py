@@ -219,7 +219,7 @@ class _Job:
 
 
 class SkipSampleType:
-    """See :attr:`scipp_uncertainty.mc.SkipSample`."""
+    """See :attr:`scippuncertainty.mc.SkipSample`."""
 
     def __repr__(self) -> str:
         """repr."""

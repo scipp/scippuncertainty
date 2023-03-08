@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from scipp_uncertainty.mc import (
+from scippuncertainty.mc import (
     NormalDenseSampler,
     PoissonDenseSampler,
     SkipSample,

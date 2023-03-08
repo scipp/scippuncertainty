@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from scipp_uncertainty.mc import CovarianceAccum, VarianceAccum
+from scippuncertainty.mc import CovarianceAccum, VarianceAccum
 
 
 def test_variance_accum_returns_single_sample():

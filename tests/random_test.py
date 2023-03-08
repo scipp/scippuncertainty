@@ -1,6 +1,6 @@
 import numpy as np
 
-from scipp_uncertainty.random import make_rngs
+from scippuncertainty.random import make_rngs
 
 
 def test_make_rngs_results_are_independent():

@@ -3,7 +3,7 @@
 
 import pytest
 
-from scipp_uncertainty._util import distribute_evenly
+from scippuncertainty._util import distribute_evenly
 
 
 @pytest.mark.parametrize("total", range(0, 30))

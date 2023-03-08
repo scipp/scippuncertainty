@@ -90,7 +90,7 @@ fixable = ["I001", # import sorting
 ]
 
 [tool.ruff.isort]
-known-first-party = ["scipp_uncertainty"]
+known-first-party = ["scippuncertainty"]
 
 [tool.ruff.pydocstyle]
 convention = "numpy"

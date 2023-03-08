@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import scipp as sc
 
-from scipp_uncertainty.mc import NormalDenseSampler, PoissonDenseSampler
+from scippuncertainty.mc import NormalDenseSampler, PoissonDenseSampler
 
 
 @pytest.mark.parametrize("sampler_type", [PoissonDenseSampler, NormalDenseSampler])

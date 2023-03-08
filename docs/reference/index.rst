@@ -4,7 +4,7 @@ Reference
 Monte-Carlo
 -----------
 
-.. currentmodule:: scipp_uncertainty.mc
+.. currentmodule:: scippuncertainty.mc
 
 .. autosummary::
    :toctree: ../generated/modules
