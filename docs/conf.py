@@ -1,15 +1,121 @@
 import doctest
 import os
 import sys
+from typing import Any, Dict, List, Optional
+
+import sphinx_book_theme
+from docutils.nodes import document
+from sphinx.application import Sphinx
 
 import scipp_uncertainty
 
 sys.path.insert(0, os.path.abspath("."))
 
+from version import VersionInfo  # noqa: E402
+
+sys.path.insert(0, os.path.abspath('.'))
+
 # General information about the project.
 project = "scippuncertainty"
 copyright = "2023 Scipp contributors"
 author = "Scipp contributors"
+
+version_info = VersionInfo(repo=project)
+long_version = scipp_uncertainty.__version__
+outdated = not version_info.is_latest(long_version)
+
+
+def make_text_icon(text: str) -> str:
+    # Inject some text into the icon of a launch button.
+    # This may need to be updated in future releases of sphinx-book-theme.
+    return ('"></i>'
+            f'<span class="btn__text-container">{text}</span>'
+            '<i class="fa fa-caret-down')
+
+
+def add_button_group(context: Dict[str, Any], buttons: List[Dict[str, str]], *,
+                     name: str, label: str) -> None:
+    context["header_buttons"].append({
+        "type": "group",
+        "buttons": buttons,
+        "icon": make_text_icon(name),
+        "label": label,
+        "tooltip": name,
+    })
+
+
+def add_related_project_buttons(context: Dict[str, Any]) -> None:
+    base = "https://scipp.github.io"
+    buttons = [
+        {
+            "type": "link",
+            "text": "scipp",
+            "url": f"{base}"
+        },
+        {
+            "type": "link",
+            "text": "plopp",
+            "url": f"{base}/plopp"
+        },
+        {
+            "type": "link",
+            "text": "scippnexus",
+            "url": f"{base}/scippnexus"
+        },
+        {
+            "type": "link",
+            "text": "scippneutron",
+            "url": f"{base}/scippneutron"
+        },
+        {
+            "type": "link",
+            "text": "ess",
+            "url": f"{base}/ess"
+        },
+    ]
+    add_button_group(context,
+                     buttons,
+                     name="Related projects",
+                     label="related-projects")
+
+
+def add_version_buttons(context: Dict[str, Any]) -> None:
+    base = "https://scipp.github.io/scippuncertainty"
+    releases = version_info.minor_releases(first='0.0')
+    if outdated:
+        current = f"{long_version} (outdated)"
+        latest = "latest"
+        entries = ['.'.join(long_version.split('.')[:2])]
+    elif not releases:
+        current = "unknown"
+        latest = "unknown"
+        entries = []
+    else:
+        current = f"{long_version} (latest)"
+        latest = f"{releases[0]} (latest)"
+        entries = releases[1:]
+    lines = [{"type": "link", "text": latest, "url": f"{base}"}]
+    for r in entries:
+        lines.append({
+            "type": "link",
+            "text": f"{r}",
+            "url": f"{base}/release/{r}"
+        })
+    add_button_group(context, lines, name=current, label="versions")
+
+
+def add_buttons(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: Dict[str, Any],
+    doctree: Optional[document],
+) -> None:
+    add_related_project_buttons(context)
+    add_version_buttons(context)
+
+
+sphinx_book_theme.add_launch_buttons = add_buttons
 
 html_show_sourcelink = True
 
@@ -100,7 +206,6 @@ todo_include_todos = False
 # -- Options for HTML output ----------------------------------------------
 html_theme = "sphinx_book_theme"
 html_theme_options = {
-    "logo_only": True,
     "repository_url": f"https://github.com/scipp/{project}",
     "repository_branch": "main",
     "path_to_docs": "docs",
