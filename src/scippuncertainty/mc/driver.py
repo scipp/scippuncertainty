@@ -3,7 +3,6 @@
 """Control bootstrap resampling."""
 from __future__ import annotations
 
-import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
 from itertools import islice
 from typing import Callable, Dict, Generator, List, Optional, Union
@@ -20,12 +19,6 @@ from .sampler import Sampler
 
 def _n_samples_per_thread(n_samples: int, n_thread: int) -> List[int]:
     return distribute_evenly(n_samples, n_thread)
-
-
-def _pick_thread_count(n_threads: Optional[int]) -> int:
-    if n_threads is None:
-        return max(multiprocessing.cpu_count(), 4)
-    return max(n_threads, 1)
 
 
 def _resample_once(
@@ -93,7 +86,7 @@ def run(
     n_samples: int,
     samplers: Dict[str, Sampler],
     accumulators: Optional[Dict[str, Accumulator]] = None,
-    n_threads: Optional[int] = None,
+    n_threads: int = 1,
     seed: Optional[
         Union[
             np.random.Generator,
@@ -128,8 +121,6 @@ def run(
         same key.
     n_threads:
         Number of threads.
-        Defaults to a small number depending on the number of cores of your CPU.
-        ``run`` uses threads and is thus affected by the GIL.
         Setting ``n_threads`` to something higher than 1 only makes sense if ``fn``
         spends a significant amount of time in code that releases the GIL
         (e.g. most functions in Scipp).
@@ -151,7 +142,7 @@ def run(
         Dict of results obtained from the accumulators.
         It contains one item per accumulator with the same key.
     """
-    rngs = make_rngs(seed=seed, n=_pick_thread_count(n_threads))
+    rngs = make_rngs(seed=seed, n=n_threads)
     results = []
     with progress_bars(visible=progress).prepare(len(rngs)) as p_bars:
         with ThreadPoolExecutor(max_workers=len(rngs)) as executor:
