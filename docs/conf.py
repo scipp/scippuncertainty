@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath("."))
 
 from version import VersionInfo  # noqa: E402
 
-sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath("."))
 
 # General information about the project.
 project = "scippuncertainty"
@@ -28,64 +28,48 @@ outdated = not version_info.is_latest(long_version)
 def make_text_icon(text: str) -> str:
     # Inject some text into the icon of a launch button.
     # This may need to be updated in future releases of sphinx-book-theme.
-    return ('"></i>'
-            f'<span class="btn__text-container">{text}</span>'
-            '<i class="fa fa-caret-down')
+    return (
+        '"></i>'
+        f'<span class="btn__text-container">{text}</span>'
+        '<i class="fa fa-caret-down'
+    )
 
 
-def add_button_group(context: Dict[str, Any], buttons: List[Dict[str, str]], *,
-                     name: str, label: str) -> None:
-    context["header_buttons"].append({
-        "type": "group",
-        "buttons": buttons,
-        "icon": make_text_icon(name),
-        "label": label,
-        "tooltip": name,
-    })
+def add_button_group(
+    context: Dict[str, Any], buttons: List[Dict[str, str]], *, name: str, label: str
+) -> None:
+    context["header_buttons"].append(
+        {
+            "type": "group",
+            "buttons": buttons,
+            "icon": make_text_icon(name),
+            "label": label,
+            "tooltip": name,
+        }
+    )
 
 
 def add_related_project_buttons(context: Dict[str, Any]) -> None:
     base = "https://scipp.github.io"
     buttons = [
-        {
-            "type": "link",
-            "text": "scipp",
-            "url": f"{base}"
-        },
-        {
-            "type": "link",
-            "text": "plopp",
-            "url": f"{base}/plopp"
-        },
-        {
-            "type": "link",
-            "text": "scippnexus",
-            "url": f"{base}/scippnexus"
-        },
-        {
-            "type": "link",
-            "text": "scippneutron",
-            "url": f"{base}/scippneutron"
-        },
-        {
-            "type": "link",
-            "text": "ess",
-            "url": f"{base}/ess"
-        },
+        {"type": "link", "text": "scipp", "url": f"{base}"},
+        {"type": "link", "text": "plopp", "url": f"{base}/plopp"},
+        {"type": "link", "text": "scippnexus", "url": f"{base}/scippnexus"},
+        {"type": "link", "text": "scippneutron", "url": f"{base}/scippneutron"},
+        {"type": "link", "text": "ess", "url": f"{base}/ess"},
     ]
-    add_button_group(context,
-                     buttons,
-                     name="Related projects",
-                     label="related-projects")
+    add_button_group(
+        context, buttons, name="Related projects", label="related-projects"
+    )
 
 
 def add_version_buttons(context: Dict[str, Any]) -> None:
     base = "https://scipp.github.io/scippuncertainty"
-    releases = version_info.minor_releases(first='0.0')
+    releases = version_info.minor_releases(first="0.0")
     if outdated:
         current = f"{long_version} (outdated)"
         latest = "latest"
-        entries = ['.'.join(long_version.split('.')[:2])]
+        entries = [".".join(long_version.split(".")[:2])]
     elif not releases:
         current = "unknown"
         latest = "unknown"
@@ -96,11 +80,7 @@ def add_version_buttons(context: Dict[str, Any]) -> None:
         entries = releases[1:]
     lines = [{"type": "link", "text": latest, "url": f"{base}"}]
     for r in entries:
-        lines.append({
-            "type": "link",
-            "text": f"{r}",
-            "url": f"{base}/release/{r}"
-        })
+        lines.append({"type": "link", "text": f"{r}", "url": f"{base}/release/{r}"})
     add_button_group(context, lines, name=current, label="versions")
 
 
@@ -223,7 +203,6 @@ html_favicon = "_static/favicon.ico"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-html_css_files = ["css/custom.css"]
 
 # -- Options for HTMLHelp output ------------------------------------------
 
@@ -258,3 +237,9 @@ linkcheck_ignore = [
 # -- Options for bibtex ---------------------------------------------------
 bibtex_bibfiles = ["bibliography.bib"]
 bibtex_reference_style = "label"
+
+# -- Options for Matplotlib in notebooks ----------------------------------
+
+nbsphinx_execute_arguments = [
+    "--Session.metadata=scipp_sphinx_build=True",
+]
