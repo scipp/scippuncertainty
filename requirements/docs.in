@@ -1,6 +1,8 @@
 -r base.in
 ipykernel
+ipympl
 ipython!=8.7.0  # Breaks syntax highlighting in Jupyter code cells.
+ipywidgets
 matplotlib
 nbsphinx
 plopp
