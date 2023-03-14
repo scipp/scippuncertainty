@@ -108,7 +108,7 @@ class VarianceAccum:
     def get(self) -> sc.DataArray:
         """Return the current result."""
         if self._n_samples == 0:
-            raise RuntimeError("There are not results to get.")
+            raise RuntimeError("There are no results to get.")
         mean = self._mean
         var = self._m2_dist / (self._n_samples - 1)
 
@@ -215,7 +215,7 @@ class CovarianceAccum:
     def get(self) -> sc.DataArray:
         """Return the current result."""
         if self._n_samples == 0:
-            raise RuntimeError("There are not results to get.")
+            raise RuntimeError("There are no results to get.")
         cov = self._c / (self._n_samples - 1)
         if isinstance(cov, sc.Variable):
             # This happens when there is only 1 sample.
