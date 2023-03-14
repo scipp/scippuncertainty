@@ -204,6 +204,12 @@ class _Job:
             samples = fn(**inputs)
             if samples is SkipSample:
                 continue
+            if samples.keys() != self._accumulators.keys():
+                raise ValueError(
+                    "Mismatch in accumulators and function return value. "
+                    f"Got accumulators {list(self._accumulators.keys())} but "
+                    f"function `{fn.__name__}` returned {list(samples.keys())}."
+                )
             for n, r in samples.items():
                 self._accumulators[n].add(r)
         return self._accumulators

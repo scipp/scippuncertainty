@@ -144,3 +144,137 @@ def test_run_can_skip_samples():
     )
 
     assert res["r"].attrs["n_samples"] == sc.index(10)
+
+
+def test_run_raises_if_sampler_is_missing():
+    def f(a, b):
+        return {"r": a + b}
+
+    rng = np.random.default_rng(125)
+    n = 11
+    da = sc.DataArray(
+        sc.array(
+            dims=["x"],
+            values=rng.normal(4.0, 0.5, n),
+            variances=rng.uniform(0.01, 0.1, n),
+        )
+    )
+
+    with pytest.raises(TypeError):
+        run(
+            f,
+            n_samples=20,
+            samplers={"a": NormalDenseSampler(da)},
+            accumulators={"r": VarianceAccum()},
+            seed=83,
+            n_threads=1,
+            progress=False,
+        )
+
+
+def test_run_raises_if_too_many_samplers():
+    def f(a, b):
+        return {"r": a + b}
+
+    rng = np.random.default_rng(125)
+    n = 11
+    da = sc.DataArray(
+        sc.array(
+            dims=["x"],
+            values=rng.normal(4.0, 0.5, n),
+            variances=rng.uniform(0.01, 0.1, n),
+        )
+    )
+
+    with pytest.raises(TypeError):
+        run(
+            f,
+            n_samples=20,
+            samplers={
+                "a": NormalDenseSampler(da),
+                "b": NormalDenseSampler(da),
+                "c": NormalDenseSampler(da),
+            },
+            accumulators={"r": VarianceAccum()},
+            seed=83,
+            n_threads=1,
+            progress=False,
+        )
+
+
+def test_run_raises_if_accumulator_is_missing():
+    def f(a):
+        return {"r": a, "s": 2 * a}
+
+    rng = np.random.default_rng(125)
+    n = 11
+    da = sc.DataArray(
+        sc.array(
+            dims=["x"],
+            values=rng.normal(4.0, 0.5, n),
+            variances=rng.uniform(0.01, 0.1, n),
+        )
+    )
+
+    with pytest.raises(ValueError):
+        run(
+            f,
+            n_samples=20,
+            samplers={"a": NormalDenseSampler(da)},
+            accumulators={"r": VarianceAccum()},
+            seed=83,
+            n_threads=1,
+            progress=False,
+        )
+
+
+def test_run_raises_if_extra_accumulator():
+    def f(a):
+        return {"r": a}
+
+    rng = np.random.default_rng(125)
+    n = 11
+    da = sc.DataArray(
+        sc.array(
+            dims=["x"],
+            values=rng.normal(4.0, 0.5, n),
+            variances=rng.uniform(0.01, 0.1, n),
+        )
+    )
+
+    with pytest.raises(ValueError):
+        run(
+            f,
+            n_samples=20,
+            samplers={"a": NormalDenseSampler(da)},
+            accumulators={"r": VarianceAccum(), "s": VarianceAccum()},
+            seed=83,
+            n_threads=1,
+            progress=False,
+        )
+
+
+def test_run_raises_if_accumulator_name_mismatch():
+    def f(a):
+        return {"r": a, "s": 2 * a}
+
+    rng = np.random.default_rng(125)
+    n = 11
+    da = sc.DataArray(
+        sc.array(
+            dims=["x"],
+            values=rng.normal(4.0, 0.5, n),
+            variances=rng.uniform(0.01, 0.1, n),
+        )
+    )
+
+    with pytest.raises(ValueError):
+        run(
+            f,
+            n_samples=20,
+            samplers={"a": NormalDenseSampler(da)},
+            accumulators={"r": VarianceAccum(), "rs": VarianceAccum()},
+            seed=83,
+            n_threads=1,
+            progress=False,
+        )
