@@ -13,8 +13,6 @@ sys.path.insert(0, os.path.abspath("."))
 
 from version import VersionInfo  # noqa: E402
 
-sys.path.insert(0, os.path.abspath("."))
-
 # General information about the project.
 project = "scippuncertainty"
 copyright = "2023 Scipp contributors"
