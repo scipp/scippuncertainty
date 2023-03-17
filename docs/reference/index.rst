@@ -25,4 +25,5 @@ Common
    :template: scipp-module-template.rst
    :recursive:
 
+   correlation
    random
