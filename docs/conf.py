@@ -55,6 +55,7 @@ def add_related_project_buttons(context: Dict[str, Any]) -> None:
         {"type": "link", "text": "scippnexus", "url": f"{base}/scippnexus"},
         {"type": "link", "text": "scippneutron", "url": f"{base}/scippneutron"},
         {"type": "link", "text": "ess", "url": f"{base}/ess"},
+        {"type": "link", "text": "scippuncertainty", "url": f"{base}/scippuncertainty"},
     ]
     add_button_group(
         context, buttons, name="Related projects", label="related-projects"
