@@ -20,7 +20,8 @@ def pearson_correlation(cov: T) -> T:
 
         r_{ij} = \Sigma_{ij} / \sqrt{\Sigma_{ii} \Sigma_{jj}}
 
-    It ranges from 0 for no correlation to 1 for full correlation.
+    It is in the range :math:`[-1, 1]`, where 0 means no correlation and
+    -1 and 1 mean full (anti-)correlation.
     The diagonal is always 1.
 
     Parameters
