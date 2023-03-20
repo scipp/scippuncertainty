@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ScippUncertainty"
+name = "scippuncertainty"
 description = "Advanced uncertainty propagation with Scipp"
 license = { "file" = "LICENSE" }
 readme = "README.md"
