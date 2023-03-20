@@ -14,4 +14,4 @@ See the corresponding `user guide <./user-guide/mc.rst>`_.
 
    user-guide/index
    reference/index
-   references
+   bibliography

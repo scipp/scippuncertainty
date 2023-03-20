@@ -36,9 +36,9 @@ dependencies = [
 all = ["rich"]
 
 [project.urls]
-"Documentation" = "https://scipp.github.io/scipp-uncertainty"
-"Bug Tracker" = "https://github.com/scipp/scipp-uncertainty/issues"
-"Source" = "https://github.com/scipp/scipp-uncertainty"
+"Documentation" = "https://scipp.github.io/scippuncertainty"
+"Bug Tracker" = "https://github.com/scipp/scippuncertainty/issues"
+"Source" = "https://github.com/scipp/scippuncertainty"
 
 [tool.setuptools_scm]
 
