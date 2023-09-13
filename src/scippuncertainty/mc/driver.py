@@ -3,9 +3,10 @@
 """Control bootstrap resampling."""
 from __future__ import annotations
 
+from collections.abc import Mapping
 from concurrent.futures import ThreadPoolExecutor
 from itertools import islice
-from typing import Callable, Dict, Generator, List, Optional, Union
+from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -13,8 +14,56 @@ import scipp as sc
 from .._progress import Progress, SilentProgress, progress_bars
 from .._util import distribute_evenly
 from ..random import make_rngs
-from .accumulator import Accumulator
+from .accumulator import Accumulated, Accumulator
 from .sampler import Sampler
+
+
+class MCResult(dict):
+    """Result of a Monte-Carlo error estimation.
+
+    Behaves like a :class:`dict` of strings to data arrays but has additional properties
+    that encode the number of samples that were computed and lists of those samples.
+    """
+
+    def __init__(
+        self,
+        *,
+        data: Dict[str, sc.DataArray],
+        n_samples: int,
+        samples: Dict[str, Optional[Tuple[sc.DataArray, ...]]],
+    ) -> None:
+        super().__init__(data)
+        self._n_samples = n_samples
+        self._samples = samples
+
+    @classmethod
+    def assemble(cls, results: Dict[str, Accumulated]) -> MCResult:
+        """Instantiate from results of individual accumulators."""
+        n_samples = {val.n_samples for val in results.values()}
+        if len(n_samples) != 1:
+            raise RuntimeError(
+                "Accumulators returned different numbers of samples. "
+                "This is either an internal bug or you started with "
+                "accumulators that already contained samples."
+            )
+
+        data = {key: val.data for key, val in results.items()}
+        samples = {key: val.samples for key, val in results.items()}
+        return MCResult(data=data, n_samples=next(iter(n_samples)), samples=samples)
+
+    def __setitem__(self, key: str, val: sc.DataArray) -> None:
+        """Setting items is not allowed."""
+        raise TypeError("MCResult is immutable")
+
+    @property
+    def n_samples(self) -> int:
+        """Number of samples."""
+        return self._n_samples
+
+    @property
+    def samples(self) -> Mapping[str, Optional[Tuple[sc.DataArray, ...]]]:
+        """Recorded samples for each accumulator."""
+        return self._samples
 
 
 def _n_samples_per_thread(n_samples: int, n_thread: int) -> List[int]:
@@ -98,7 +147,7 @@ def run(
     ] = None,
     progress: Optional[bool] = None,
     description: str = "Monte-Carlo",
-) -> Dict[str, sc.DataArray]:
+) -> MCResult:
     """Propagate uncertainties using Monte-Carlo.
 
     This function drives the propagation by drawing samples, calling the provided
@@ -163,7 +212,9 @@ def run(
     for res in results[1:]:
         for a, b in zip(accumulators.values(), res.result().values()):
             a.add_from(b)
-    return {name: accum.get() for name, accum in accumulators.items()}
+    return MCResult.assemble(
+        {name: accum.get() for name, accum in accumulators.items()}
+    )
 
 
 class _Job:

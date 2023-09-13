@@ -3,11 +3,21 @@
 """Compute desired statistics on processed data."""
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import List, Optional, Protocol, Tuple, TypeVar, Union
 
 import scipp as sc
 
 A = TypeVar("A", bound="Accumulator")
+
+
+@dataclass(frozen=True)
+class Accumulated:
+    """Accumulated data and metadata."""
+
+    data: sc.DataArray
+    n_samples: int
+    samples: Optional[Tuple[sc.DataArray, ...]] = None
 
 
 class Accumulator(Protocol):
@@ -19,7 +29,7 @@ class Accumulator(Protocol):
     def add_from(self: A, other: A) -> None:
         """Merge results from ``other`` into ``self``."""
 
-    def get(self) -> sc.DataArray:
+    def get(self) -> Accumulated:
         """Return the current result."""
 
     def new(self: A) -> A:
@@ -105,7 +115,7 @@ class VarianceAccum:
         if self._samples is not None:
             self._samples.extend(other._samples)
 
-    def get(self) -> sc.DataArray:
+    def get(self) -> Accumulated:
         """Return the current result."""
         if self._n_samples == 0:
             raise RuntimeError("There are no results to get.")
@@ -114,10 +124,12 @@ class VarianceAccum:
 
         res = mean
         res.variances = var.values
-        res.attrs["n_samples"] = sc.index(self._n_samples)
-        if self._samples is not None:
-            res.attrs["samples"] = sc.index(sc.concat(self._samples, "monte_carlo"))
-        return res
+
+        return Accumulated(
+            data=res,
+            n_samples=self._n_samples,
+            samples=tuple(self._samples) if self._samples is not None else None,
+        )
 
     def new(self) -> VarianceAccum:
         """Return a new VarianceAccum.
@@ -181,8 +193,6 @@ class CovarianceAccum:
             del sample.coords[key]
         for key in list(sample.masks):
             del sample.masks[key]
-        for key in list(sample.attrs):
-            del sample.attrs[key]
 
         self._n_samples += 1
         if self._mean is None:
@@ -212,7 +222,7 @@ class CovarianceAccum:
             )
         self._n_samples += other._n_samples
 
-    def get(self) -> sc.DataArray:
+    def get(self) -> Accumulated:
         """Return the current result."""
         if self._n_samples == 0:
             raise RuntimeError("There are no results to get.")
@@ -222,11 +232,12 @@ class CovarianceAccum:
             cov = sc.DataArray(
                 cov,
                 coords=self._mean.coords,
-                attrs=self._mean.attrs,
                 masks=self._mean.masks,
             )
-        cov.attrs["n_samples"] = sc.index(self._n_samples)
-        return cov
+        return Accumulated(
+            data=cov,
+            n_samples=self._n_samples,
+        )
 
     def new(self) -> CovarianceAccum:
         """Return a new CovarianceAccum.
