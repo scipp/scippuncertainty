@@ -207,6 +207,8 @@ doctest_default_flags = (
 linkcheck_ignore = [
     # Specific lines in GitHub blobs cannot be found by linkcheck.
     r"https?://github\.com/.*?/blob/[a-f0-9]+/.+?#",
+    # DOIs in the bibliography lead to redirects that linkcheck struggles with.
+    r"https?://doi\.org/.*",
 ]
 
 # -- Options for bibtex ---------------------------------------------------
