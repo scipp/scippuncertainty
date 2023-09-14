@@ -143,7 +143,7 @@ def test_run_can_skip_samples():
         progress=False,
     )
 
-    assert res["r"].attrs["n_samples"] == sc.index(10)
+    assert res.n_samples == 10
 
 
 def test_run_raises_if_sampler_is_missing():

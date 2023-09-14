@@ -4,6 +4,7 @@
 import numpy as np
 import pytest
 import scipp as sc
+import scipp.testing
 
 from scippuncertainty.mc import CovarianceAccum, VarianceAccum
 
@@ -16,10 +17,13 @@ def test_variance_accum_returns_single_sample():
     accum.add(da)
 
     res = accum.get()
-    assert sc.identical(sc.values(res.data), da.data)
-    assert sc.identical(sc.values(res.coords["h"]), da.coords["h"])
+    data, n_samples = res.data, res.n_samples
+
+    assert n_samples == 1
+    assert sc.identical(sc.values(data.data), da.data)
+    assert sc.identical(sc.values(data.coords["h"]), da.coords["h"])
     # Cannot have variances with one sample
-    assert sc.all(sc.isnan(sc.variances(res.data)))
+    assert sc.all(sc.isnan(sc.variances(data.data)))
 
 
 def test_variance_accum_returns_expected_result():
@@ -32,7 +36,7 @@ def test_variance_accum_returns_expected_result():
     for i in range(15):
         accum.add(da["observation", i])
 
-    res = accum.get()
+    res = accum.get().data
     np.testing.assert_allclose(res.values, sc.mean(da, dim="observation").values)
     np.testing.assert_allclose(res.variances, np.var(da.values, axis=0, ddof=1))
 
@@ -49,7 +53,7 @@ def test_variance_accum_returns_expected_result_2d():
     for i in range(11):
         accum.add(da["observation", i])
 
-    res = accum.get()
+    res = accum.get().data
     np.testing.assert_allclose(res.values, sc.mean(da, dim="observation").values)
     np.testing.assert_allclose(res.variances, np.var(da.values, axis=0, ddof=1))
 
@@ -64,48 +68,65 @@ def test_variance_accum_returns_number_of_samples():
     accum.add(da)
     accum.add(da)
 
-    res = accum.get()
-    assert sc.identical(res.attrs["n_samples"], sc.index(4))
+    assert accum.get().n_samples == 4
 
 
 def test_variance_accum_can_return_samples():
     da = sc.DataArray(
         sc.arange("u", 3.0, unit="s"), coords={"o": sc.arange("u", 3) * 0.1}
     )
-    expected = sc.concat([da, 2 * da], "monte_carlo")
+    expected0 = da.copy()
+    expected1 = 2 * da.copy()
 
     accum = VarianceAccum(keep_samples=True)
     accum.add(da)
     da *= 2  # doing in-place modification to test copy behavior
     accum.add(da)
 
-    res = accum.get()
-    assert sc.identical(res.attrs["samples"].value, expected)
+    samples = accum.get().samples
+    assert len(samples) == 2
+    sc.testing.assert_identical(samples[0], expected0)
+    sc.testing.assert_identical(samples[1], expected1)
+
+
+def test_variance_accum_does_not_return_samples_if_disabled():
+    da = sc.DataArray(
+        sc.arange("u", 3.0, unit="s"), coords={"o": sc.arange("u", 3) * 0.1}
+    )
+
+    accum = VarianceAccum(keep_samples=False)
+    accum.add(da)
+    da *= 2  # doing in-place modification to test copy behavior
+    accum.add(da)
+
+    assert accum.get().samples is None
 
 
 def test_variance_accum_preserves_metadata():
     rng = np.random.default_rng(83)
     da = sc.DataArray(
         sc.array(dims=["variable", "observation"], values=rng.normal(0.0, 1.0, (9, 2))),
-        coords={"x": sc.arange("variable", 9, unit="kg")},
+        coords={
+            "x": sc.arange("variable", 9, unit="kg"),
+            "y": -sc.arange("variable", 9),
+        },
         masks={"m": sc.arange("variable", 9) < 7},
-        attrs={"a": sc.index(4), "b": sc.scalar("a string")},
     )
+    da.coords.set_aligned("y", aligned=False)
 
     accum = VarianceAccum()
     accum.add(da["observation", 0])
     accum.add(da["observation", 1])
-    res = accum.get()
+    res = accum.get().data
 
-    assert set(res.coords.keys()) == {"x"}
+    assert set(res.coords.keys()) == {"x", "y"}
     assert sc.identical(res.coords["x"], sc.arange("variable", 9, unit="kg"))
+    assert sc.identical(res.coords["y"], -sc.arange("variable", 9))
+    assert res.coords["x"].aligned
+    assert not res.coords["y"].aligned
 
     assert set(res.masks.keys()) == {"m"}
     assert sc.identical(res.masks["m"], sc.arange("variable", 9) < 7)
-
-    assert set(res.attrs.keys()) == {"a", "b", "n_samples"}
-    assert sc.identical(res.attrs["a"], sc.index(4))
-    assert sc.identical(res.attrs["b"], sc.scalar("a string"))
 
 
 def test_variance_accum_add_from():
@@ -134,8 +155,8 @@ def test_variance_accum_add_from():
     accum0.add_from(accum1)
     accum0.add_from(accum2)
 
-    a = accum0.get()
-    b = accum_total.get()
+    a = accum0.get().data
+    b = accum_total.get().data
     np.testing.assert_allclose(a.values, b.values)
     np.testing.assert_allclose(a.variances, b.variances)
 
@@ -163,7 +184,7 @@ def test_variance_accum_new_passes_keep_samples_along(keep_samples):
     new = accum.new()
     new.add(da)
 
-    assert ("samples" in new.get().attrs) == keep_samples
+    assert (new.get().samples is not None) == keep_samples
 
 
 def test_covariance_accum_returns_expected_result():
@@ -176,7 +197,7 @@ def test_covariance_accum_returns_expected_result():
     for i in range(19):
         accum.add(da["observation", i])
 
-    res = accum.get()
+    res = accum.get().data
     expected = np.cov(da.values)
     np.testing.assert_allclose(res.values, expected)
     assert res.variances is None
@@ -190,8 +211,8 @@ def test_covariance_accum_returns_expected_result_1_sample():
     accum.add(da)
 
     res = accum.get()
-    assert sc.all(sc.isnan(res)).value
-    assert res.attrs["n_samples"] == sc.index(1)
+    assert sc.all(sc.isnan(res.data)).value
+    assert res.n_samples == 1
 
 
 def test_covariance_accum_returns_number_of_samples():
@@ -205,8 +226,7 @@ def test_covariance_accum_returns_number_of_samples():
     accum.add(da)
     accum.add(da)
 
-    res = accum.get()
-    assert sc.identical(res.attrs["n_samples"], sc.index(5))
+    assert accum.get().n_samples == 5
 
 
 def test_covariance_accum_erases_metadata():
@@ -221,11 +241,10 @@ def test_covariance_accum_erases_metadata():
     accum = CovarianceAccum()
     accum.add(da["observation", 0])
     accum.add(da["observation", 1])
-    res = accum.get()
+    res = accum.get().data
 
     assert not res.coords.keys()
     assert not res.masks.keys()
-    assert set(res.attrs.keys()) == {"n_samples"}
 
 
 def test_covariance_accum_add_from():
@@ -254,8 +273,8 @@ def test_covariance_accum_add_from():
     accum0.add_from(accum1)
     accum0.add_from(accum2)
 
-    a = accum0.get()
-    b = accum_total.get()
+    a = accum0.get().data
+    b = accum_total.get().data
     np.testing.assert_allclose(a.values, b.values)
 
 
@@ -280,4 +299,4 @@ def test_covariance_accum_new_passes_dims_along(dims):
     accum.add(da)
     new.add(da)
 
-    assert accum.get().dims == new.get().dims
+    assert accum.get().data.dims == new.get().data.dims

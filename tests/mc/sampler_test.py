@@ -4,6 +4,7 @@
 import numpy as np
 import pytest
 import scipp as sc
+import scipp.testing
 
 from scippuncertainty.mc import NormalDenseSampler, PoissonDenseSampler
 
@@ -52,27 +53,18 @@ def test_dense_samplers_reproduce_input_metadata(sampler_type):
             values=rng.uniform(0.0, 1.0, 10),
             variances=rng.uniform(0.001, 0.1, 10),
         ),
-        coords={"xx": sc.arange("xx", 10, unit="s")},
-        masks={"m": sc.arange("xx", 10) < 5},
-        attrs={
-            "a": sc.scalar(8),
-            "b": sc.scalar("a string"),
-            "c": sc.arange("xx", 10) * 2,
+        coords={
+            "xx": sc.arange("xx", 10, unit="s"),
+            "a": -sc.arange("xx", 10, unit="s"),
         },
+        masks={"m": sc.arange("xx", 10) < 5},
     )
+    da.coords.set_aligned("a", aligned=False)
     sampler = sampler_type(da)
     sample = sampler.sample_once(rng)
 
-    assert set(sample.coords.keys()) == set(da.coords.keys())
-    assert sc.identical(sample.coords["xx"], da.coords["xx"])
-
-    assert set(sample.masks.keys()) == set(da.masks.keys())
-    assert sc.identical(sample.masks["m"], da.masks["m"])
-
-    assert set(sample.attrs.keys()) == set(da.attrs.keys())
-    assert sc.identical(sample.attrs["a"], da.attrs["a"])
-    assert sc.identical(sample.attrs["b"], da.attrs["b"])
-    assert sc.identical(sample.attrs["c"], da.attrs["c"])
+    sc.testing.assert_identical(sample.coords, da.coords)
+    sc.testing.assert_identical(sample.masks, da.masks)
 
 
 @pytest.mark.parametrize("sampler_type", [PoissonDenseSampler, NormalDenseSampler])
