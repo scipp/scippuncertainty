@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import doctest
-import os
-import sys
 
 import scippuncertainty
-
-sys.path.insert(0, os.path.abspath('.'))
 
 # General information about the project.
 project = u'scippuncertainty'
