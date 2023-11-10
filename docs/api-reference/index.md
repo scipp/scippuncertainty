@@ -9,7 +9,7 @@
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
-   
+
    accumulator
    driver
    sampler
@@ -24,7 +24,7 @@
    :toctree: ../generated/modules
    :template: module-template.rst
    :recursive:
-   
+
    correlation
    random
 ```

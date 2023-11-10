@@ -3,12 +3,8 @@
 """Monte-Carlo uncertainty propagation."""
 
 from .accumulator import Accumulator, CovarianceAccum, VarianceAccum
-from .driver import (
-    SkipSample,
-    resample,
-    resample_n,
-    run,  # noqa: F401
-)
+from .driver import run  # noqa: F401
+from .driver import SkipSample, resample, resample_n
 from .sampler import NormalDenseSampler, PoissonDenseSampler, Sampler
 
 __all__ = [

@@ -130,7 +130,7 @@ html_theme_options = {
     "external_links": [
         {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
         {"name": "Scipp", "url": "https://scipp.github.io"},
-        ],
+    ],
     "icon_links": [
         {
             "name": "GitHub",
