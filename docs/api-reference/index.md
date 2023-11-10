@@ -1,29 +1,30 @@
-Reference
-=========
+# API Reference
 
-Monte-Carlo
------------
+## Monte-Carlo
 
+```{eval-rst}
 .. currentmodule:: scippuncertainty.mc
 
 .. autosummary::
    :toctree: ../generated/modules
-   :template: scipp-module-template.rst
+   :template: module-template.rst
    :recursive:
-
+   
    accumulator
    driver
    sampler
+```
 
-Common
-------
+## Common
 
+```{eval-rst}
 .. currentmodule:: scippuncertainty
 
 .. autosummary::
    :toctree: ../generated/modules
-   :template: scipp-module-template.rst
+   :template: module-template.rst
    :recursive:
-
+   
    correlation
    random
+```

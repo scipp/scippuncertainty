@@ -1,4 +1,2 @@
 -r base.in
 pytest
-pytest-randomly
-pytest-xdist

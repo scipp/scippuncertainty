@@ -1,16 +1,16 @@
 [build-system]
 requires = [
-    "setuptools>=45",
-    "setuptools_scm[toml]>=7.0",
+  "setuptools>=68",
+  "setuptools_scm[toml]>=8.0",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "scippuncertainty"
 description = "Advanced uncertainty propagation with Scipp"
-license = { "file" = "LICENSE" }
+authors = [{ name = "Scipp contributors" }]
+license = { file = "LICENSE" }
 readme = "README.md"
-keywords = []
 classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
@@ -25,35 +25,46 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Typing :: Typed",
 ]
-dynamic = ["version"]
 requires-python = ">=3.8"
+
+# IMPORTANT:
+# Run 'tox -e deps' after making changes here. This will update requirement files.
+# Make sure to list one dependency per line.
 dependencies = [
-    "numpy>=1.20",
     "scipp"
 ]
+
+dynamic = ["version"]
 
 [project.optional-dependencies]
 all = ["rich"]
 
 [project.urls]
-"Documentation" = "https://scipp.github.io/scippuncertainty"
 "Bug Tracker" = "https://github.com/scipp/scippuncertainty/issues"
+"Documentation" = "https://scipp.github.io/scippuncertainty"
 "Source" = "https://github.com/scipp/scippuncertainty"
 
 [tool.setuptools_scm]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
+addopts = "-ra -v"
 testpaths = "tests"
-addopts = """
---strict-config
---strict-markers
--ra
--v
-"""
 filterwarnings = [
-    "error",
+  "error",
 ]
+
+[tool.bandit]
+# Excluding tests because bandit doesn't like `assert`.
+exclude_dirs = ["docs/conf.py", "tests"]
+
+[tool.black]
+skip-string-normalization = true
+
+[tool.isort]
+skip_gitignore = true
+profile = "black"
+known_first_party = ["scippuncertainty"]
 
 [tool.mypy]
 mypy_path = "src"
@@ -66,31 +77,3 @@ enable_error_code = [
 strict = true
 show_error_codes = true
 warn_unreachable = true
-
-[tool.ruff]
-line-length = 88
-select = ["B", "D", "E", "F", "I", "S", "T", "FBT003", "RUF100"]
-ignore = [
-    "B905", # `zip()` without an explicit `strict=` parameter
-    "E741", "E742", "E743", # do not use names ‘l’, ‘O’, or ‘I’; they are not a problem with a proper font
-]
-extend-exclude = [".*", "__pycache__", "build", "dist"]
-fixable = ["I001", # import sorting
-]
-
-[tool.ruff.per-file-ignores]
-"tests/*" = [
-    "S101", # asserts are fine in tests
-    # don't need docstrings in tests
-    "D100", "D101", "D102", "D103", "D104", "D105",
-]
-"docs/*" = [
-    # don't need docstrings for docs internals
-    "D100", "D101", "D102", "D103", "D104", "D105",
-]
-
-[tool.ruff.isort]
-known-first-party = ["scippuncertainty"]
-
-[tool.ruff.pydocstyle]
-convention = "numpy"
