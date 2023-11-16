@@ -5,7 +5,7 @@ import doctest
 import scippuncertainty
 
 # General information about the project.
-project = u'scippuncertainty'
+project = u'ScippUncertainty'
 copyright = u'2023 Scipp contributors'
 author = u'Scipp contributors'
 
@@ -118,6 +118,7 @@ html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "primary_sidebar_end": ["edit-this-page", "sourcelink"],
     "secondary_sidebar_items": [],
+    "navbar_persistent": ["search-button"],
     "show_nav_level": 1,
     # Adjust this to ensure external links are moved to "Move" menu
     "header_links_before_dropdown": 4,
@@ -147,8 +148,8 @@ html_theme_options = {
         {
             "name": "Conda",
             "url": "https://anaconda.org/conda-forge/scippuncertainty",
-            "icon": "_static/anaconda-logo.svg",
-            "type": "local",
+            "icon": "fa-custom fa-anaconda",
+            "type": "fontawesome",
         },
     ],
     "footer_start": ["copyright", "sphinx-version"],
@@ -161,7 +162,7 @@ html_sidebars = {
     "**": ["sidebar-nav-bs", "page-toc"],
 }
 
-html_title = "scippuncertainty"
+html_title = "ScippUncertainty"
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.ico"
 
@@ -169,7 +170,8 @@ html_favicon = "_static/favicon.ico"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_css_files = ["css/custom.css"]
+html_css_files = []
+html_js_files = ["anaconda-icon.js"]
 
 # -- Options for HTMLHelp output ------------------------------------------
 

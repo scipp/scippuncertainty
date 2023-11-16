@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 9cf97d4
+_commit: 3f84d27
 _src_path: gh:scipp/copier_template
 description: Advanced uncertainty propagation with Scipp
 max_python: '3.11'
@@ -7,6 +7,7 @@ min_python: '3.8'
 namespace_package: ''
 nightly_deps: scipp,plopp
 orgname: scipp
+prettyname: ScippUncertainty
 projectname: scippuncertainty
 related_projects: Scipp,Plopp
 year: 2023
