@@ -5,13 +5,19 @@
 #
 #    pip-compile-multi
 #
-confuse==2.0.1
-    # via scipp
 graphlib-backport==1.0.3
     # via scipp
-numpy==1.24.4
-    # via scipp
-pyyaml==6.0.1
-    # via confuse
-scipp==23.8.0
+markdown-it-py==2.2.0
+    # via rich
+mdurl==0.1.2
+    # via markdown-it-py
+numpy==1.24.2
+    # via
+    #   -r base.in
+    #   scipp
+pygments==2.14.0
+    # via rich
+rich==13.3.2
+    # via -r base.in
+scipp==23.11.0
     # via -r base.in
