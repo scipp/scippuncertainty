@@ -3,7 +3,7 @@ _commit: 3f84d27
 _src_path: gh:scipp/copier_template
 description: Advanced uncertainty propagation with Scipp
 max_python: '3.11'
-min_python: '3.8'
+min_python: '3.9'
 namespace_package: ''
 nightly_deps: scipp,plopp
 orgname: scipp

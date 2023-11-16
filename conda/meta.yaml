@@ -11,7 +11,7 @@ requirements:
     - setuptools
     - setuptools_scm
   run:
-    - python>=3.8
+    - python>=3.9
     - scipp>=23.01.1
 
 test:
