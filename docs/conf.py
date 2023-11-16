@@ -1,106 +1,56 @@
-import doctest
-import os
-import sys
-from typing import Any, Dict, Optional
+# -*- coding: utf-8 -*-
 
-import sphinx_book_theme
-from docutils.nodes import document
-from sphinx.application import Sphinx
+import doctest
 
 import scippuncertainty
 
-sys.path.insert(0, os.path.abspath("."))
-
-from version import VersionInfo  # noqa: E402
-
 # General information about the project.
-project = "scippuncertainty"
-copyright = "2023 Scipp contributors"
-author = "Scipp contributors"
-
-version_info = VersionInfo(repo=project)
-long_version = scippuncertainty.__version__
-outdated = not version_info.is_latest(long_version)
-
-
-def add_buttons(
-    app: Sphinx,
-    pagename: str,
-    templatename: str,
-    context: Dict[str, Any],
-    doctree: Optional[document],
-):
-    base = "https://scipp.github.io"
-    l1 = []
-    l1.append({"type": "link", "text": "scipp", "url": f"{base}"})
-    l1.append({"type": "link", "text": "plopp", "url": f"{base}/plopp"})
-    l1.append({"type": "link", "text": "scippnexus", "url": f"{base}/scippnexus"})
-    l1.append({"type": "link", "text": "scippneutron", "url": f"{base}/scippneutron"})
-    l1.append({"type": "link", "text": "ess", "url": f"{base}/ess"})
-    l1.append(
-        {"type": "link", "text": "scippuncertainty", "url": f"{base}/scippuncertainty"}
-    )
-    header_buttons = context["header_buttons"]
-    header_buttons.append(
-        {
-            "type": "group",
-            "buttons": l1,
-            "icon": "fa fa-caret-down",
-            "text": "Related projects",
-        }
-    )
-    releases = version_info.minor_releases(first="0.8")
-    if outdated:
-        current = f"{long_version} (outdated)"
-        latest = "latest"
-        entries = [".".join(long_version.split(".")[:2])]
-    elif not releases:
-        current = "unknown"
-        latest = "unknown"
-        entries = []
-    else:
-        current = f"{long_version} (latest)"
-        latest = f"{releases[0]} (latest)"
-        entries = releases[1:]
-    lines = [{"type": "link", "text": latest, "url": f"{base}"}]
-    for r in entries:
-        lines.append({"type": "link", "text": f"{r}", "url": f"{base}/release/{r}"})
-    header_buttons.append(
-        {"type": "group", "buttons": lines, "icon": "fa fa-caret-down", "text": current}
-    )
-
-
-sphinx_book_theme.add_launch_buttons = add_buttons
+project = u'scippuncertainty'
+copyright = u'2023 Scipp contributors'
+author = u'Scipp contributors'
 
 html_show_sourcelink = True
 
-# -- General configuration ------------------------------------------------
-
-# If your documentation needs a minimal Sphinx version, state it here.
-#
-# needs_sphinx = '1.0'
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.doctest",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.viewcode",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.doctest',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.napoleon',
     "sphinxcontrib.bibtex",
-    "sphinx_autodoc_typehints",
-    "sphinx_copybutton",
-    "nbsphinx",
+    'sphinx_autodoc_typehints',
+    'sphinx_copybutton',
+    "sphinx_design",
+    'nbsphinx',
+    'myst_parser',
 ]
 
+myst_enable_extensions = [
+    "amsmath",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+
+myst_heading_anchors = 3
+
+autodoc_type_aliases = {
+    'array_like': 'array_like',
+}
+
 intersphinx_mapping = {
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "python": ("https://docs.python.org/3", None),
-    "scipp": ("https://scipp.github.io/", None),
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
 }
 
 # autodocs includes everything, even irrelevant API internals. autosummary
@@ -113,26 +63,30 @@ napoleon_numpy_docstring = True
 napoleon_use_param = True
 napoleon_use_rtype = False
 napoleon_preprocess_types = True
-typehints_defaults = "comma"
+napoleon_type_aliases = {
+    # objects without namespace: numpy
+    "ndarray": "~numpy.ndarray",
+}
+typehints_defaults = 'comma'
 typehints_use_rtype = False
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
-html_sourcelink_suffix = ""  # Avoid .ipynb.txt extensions in sources
+source_suffix = ['.rst', '.md']
+html_sourcelink_suffix = ''  # Avoid .ipynb.txt extensions in sources
 
 # The master toctree document.
-master_doc = "index"
+master_doc = 'index'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
+
 # The short X.Y version.
 version = scippuncertainty.__version__
 # The full version, including alpha/beta/rc tags.
@@ -150,51 +104,92 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "**.ipynb_checkpoints"]
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
+pygments_style = 'sphinx'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
 # -- Options for HTML output ----------------------------------------------
-html_theme = "sphinx_book_theme"
+
+html_theme = "pydata_sphinx_theme"
 html_theme_options = {
-    "repository_url": f"https://github.com/scipp/{project}",
-    "repository_branch": "main",
-    "path_to_docs": "docs",
-    "use_repository_button": True,
-    "use_issues_button": True,
-    "use_edit_page_button": True,
-    "show_toc_level": 2,  # Show subheadings in secondary sidebar
+    "primary_sidebar_end": ["edit-this-page", "sourcelink"],
+    "secondary_sidebar_items": [],
+    "show_nav_level": 1,
+    # Adjust this to ensure external links are moved to "Move" menu
+    "header_links_before_dropdown": 4,
+    "pygment_light_style": "github-light-high-contrast",
+    "pygment_dark_style": "github-dark-high-contrast",
+    "logo": {
+        "image_light": "_static/logo.svg",
+        "image_dark": "_static/logo-dark.svg",
+    },
+    "external_links": [
+        {"name": "Plopp", "url": "https://scipp.github.io/plopp"},
+        {"name": "Scipp", "url": "https://scipp.github.io"},
+    ],
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/scipp/scippuncertainty",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/scippuncertainty/",
+            "icon": "fa-brands fa-python",
+            "type": "fontawesome",
+        },
+        {
+            "name": "Conda",
+            "url": "https://anaconda.org/conda-forge/scippuncertainty",
+            "icon": "_static/anaconda-logo.svg",
+            "type": "local",
+        },
+    ],
+    "footer_start": ["copyright", "sphinx-version"],
+    "footer_end": ["doc_version", "theme-version"],
+}
+html_context = {
+    "doc_path": "docs",
+}
+html_sidebars = {
+    "**": ["sidebar-nav-bs", "page-toc"],
 }
 
-html_title = "ScippUncertainty"
+html_title = "scippuncertainty"
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = ['_static']
+html_css_files = ["css/custom.css"]
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "scippuncertaintydoc"
+htmlhelp_basename = 'scippuncertaintydoc'
+
+# -- Options for Matplotlib in notebooks ----------------------------------
+
+nbsphinx_execute_arguments = [
+    "--Session.metadata=scipp_docs_build=True",
+]
 
 # -- Options for doctest --------------------------------------------------
 
-# sc.plot returns a Figure object and doctest compares that against the
-# output written in the docstring. But we only want to show an image of the
-# figure, not its `repr`.
-# In addition, there is no need to make plots in doctest as the documentation
-# build already tests if those plots can be made.
-# So we simply disable plots in doctests.
-doctest_global_setup = """
-"""
+doctest_global_setup = '''
+import numpy as np
+'''
 
+# Using normalize whitespace because many __str__ functions in scipp produce
+# extraneous empty lines and it would look strange to include them in the docs.
 doctest_default_flags = (
     doctest.ELLIPSIS
     | doctest.IGNORE_EXCEPTION_DETAIL
@@ -205,8 +200,8 @@ doctest_default_flags = (
 # -- Options for linkcheck ------------------------------------------------
 
 linkcheck_ignore = [
-    # Specific lines in GitHub blobs cannot be found by linkcheck.
-    r"https?://github\.com/.*?/blob/[a-f0-9]+/.+?#",
+    # Specific lines in Github blobs cannot be found by linkcheck.
+    r'https?://github\.com/.*?/blob/[a-f0-9]+/.+?#',
     # DOIs in the bibliography lead to redirects that linkcheck struggles with.
     r"https?://doi\.org/.*",
 ]
@@ -214,9 +209,3 @@ linkcheck_ignore = [
 # -- Options for bibtex ---------------------------------------------------
 bibtex_bibfiles = ["bibliography.bib"]
 bibtex_reference_style = "label"
-
-# -- Options for Matplotlib in notebooks ----------------------------------
-
-nbsphinx_execute_arguments = [
-    "--Session.metadata=scipp_sphinx_build=True",
-]

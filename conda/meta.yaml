@@ -1,6 +1,8 @@
 package:
   name: scippuncertainty
+
   version: {{ GIT_DESCRIBE_TAG }}
+
 source:
   path: ..
 
