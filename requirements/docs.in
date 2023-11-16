@@ -4,21 +4,11 @@ ipykernel
 ipython!=8.7.0  # Breaks syntax highlighting in Jupyter code cells.
 myst-parser
 nbsphinx
-<<<<<<< before updating
 plopp
-pydata-sphinx-theme>=0.13
-||||||| last update
-pydata-sphinx-theme>=0.13
-=======
 pydata-sphinx-theme>=0.14
->>>>>>> after updating
 sphinx
 sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-design
-<<<<<<< before updating
 sphinxcontrib-bibtex
-||||||| last update
-=======
 platformdirs<4  # temporary until virtualenv has release with support for this
->>>>>>> after updating
