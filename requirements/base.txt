@@ -7,17 +7,7 @@
 #
 graphlib-backport==1.0.3
     # via scipp
-markdown-it-py==2.2.0
-    # via rich
-mdurl==0.1.2
-    # via markdown-it-py
-numpy==1.24.2
-    # via
-    #   -r base.in
-    #   scipp
-pygments==2.14.0
-    # via rich
-rich==13.3.2
-    # via -r base.in
+numpy==1.26.2
+    # via scipp
 scipp==23.11.0
     # via -r base.in
