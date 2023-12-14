@@ -9,5 +9,5 @@ graphlib-backport==1.0.3
     # via scipp
 numpy==1.26.2
     # via scipp
-scipp==23.11.0
+scipp==23.11.1
     # via -r base.in
