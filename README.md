@@ -3,7 +3,7 @@
 [![Anaconda-Server Badge](https://anaconda.org/scipp/scippuncertainty/badges/version.svg)](https://anaconda.org/scipp/scippuncertainty)
 [![License: BSD 3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
 
-# scippuncertainty
+# ScippUncertainty
 
 ## About
 

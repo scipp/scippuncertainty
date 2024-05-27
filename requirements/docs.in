@@ -10,4 +10,3 @@ sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-design
 sphinxcontrib-bibtex
-platformdirs<4  # temporary until virtualenv has release with support for this

@@ -2,17 +2,12 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Progress bars."""
 
+from collections.abc import Iterable, Iterator, Sequence
 from contextlib import contextmanager
 from typing import (
     Any,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
     Protocol,
-    Sequence,
     TypeVar,
-    Union,
 )
 
 ProgressType = TypeVar("ProgressType")
@@ -26,9 +21,9 @@ class Progress(Protocol):
 
     def track(
         self,
-        sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
+        sequence: Iterable[ProgressType] | Sequence[ProgressType],
         description: str,
-        total: Optional[float] = None,
+        total: float | None = None,
     ) -> Iterable[ProgressType]:
         """Display and update a progress bar based on the provided sequence.
 
@@ -53,9 +48,9 @@ class SilentProgress:
 
     @staticmethod
     def track(
-        sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
+        sequence: Iterable[ProgressType] | Sequence[ProgressType],
         description: str,
-        total: Optional[float] = None,
+        total: float | None = None,
     ) -> Iterable[ProgressType]:
         """Return the input sequence.
 
@@ -99,9 +94,9 @@ class RichProgress:
 
     def track(
         self,
-        sequence: Union[Iterable[ProgressType], Sequence[ProgressType]],
+        sequence: Iterable[ProgressType] | Sequence[ProgressType],
         description: str,
-        total: Optional[float] = None,
+        total: float | None = None,
     ) -> Iterable[ProgressType]:
         """Display and update a progress bar based on the provided sequence.
 
@@ -132,7 +127,7 @@ class MultiProgress(Protocol):
     """Manager for multiple progress bars."""
 
     @contextmanager
-    def prepare(self, n: int) -> Iterator[List[Progress]]:
+    def prepare(self, n: int) -> Iterator[list[Progress]]:
         """Create individual progress bars and set up display.
 
         The bars may only be used while this contextmanager is active.
@@ -143,7 +138,7 @@ class SilentMultiProgress:
     """Manager for multiple silent progress bars."""
 
     @contextmanager
-    def prepare(self, n: int) -> Iterator[List[Progress]]:
+    def prepare(self, n: int) -> Iterator[list[Progress]]:
         """Create individual silent progress bars and set up display."""
         yield [SilentProgress() for _ in range(n)]
 
@@ -152,7 +147,7 @@ class RichMultiProgress:
     """Manager for multiple rich progress bars."""
 
     @contextmanager
-    def prepare(self, n: int) -> Iterator[List[Progress]]:
+    def prepare(self, n: int) -> Iterator[list[Progress]]:
         """Create individual rich progress bars and set up display.
 
         The bars may only be used while this contextmanager is active.
@@ -173,7 +168,7 @@ def _rich_is_installed() -> bool:
     return True
 
 
-def progress_bars(visible: Optional[bool]) -> MultiProgress:
+def progress_bars(visible: bool | None) -> MultiProgress:
     """Construct a multi progress bar.
 
     Parameters
