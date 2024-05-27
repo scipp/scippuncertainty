@@ -2,26 +2,21 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Random number generators."""
 
-from typing import List, Optional, Union
-
 import numpy as np
 
 from .logging import get_logger
 
 
 def make_rngs(
-    seed: Optional[
-        Union[
-            np.random.Generator,
-            List[np.random.Generator],
-            int,
-            List[int],
-            np.random.SeedSequence,
-        ]
-    ],
+    seed: np.random.Generator
+    | list[np.random.Generator]
+    | int
+    | list[int]
+    | np.random.SeedSequence
+    | None,
     *,
     n: int,
-) -> List[np.random.Generator]:
+) -> list[np.random.Generator]:
     """Instantiate new random number generators.
 
     Creates the given number of random generators using
@@ -82,7 +77,7 @@ def make_rngs(
 
 
 def _make_seed_sequence(
-    seed: Optional[Union[int, List[int], np.random.SeedSequence]]
+    seed: int | list[int] | np.random.SeedSequence | None,
 ) -> np.random.SeedSequence:
     if seed is None:
         return np.random.SeedSequence()

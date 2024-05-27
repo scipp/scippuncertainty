@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Compute desired statistics on processed data."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Optional, Protocol, Tuple, TypeVar, Union
+from typing import Protocol, TypeVar
 
 import scipp as sc
 
@@ -17,7 +18,7 @@ class Accumulated:
 
     data: sc.DataArray
     n_samples: int
-    samples: Optional[Tuple[sc.DataArray, ...]] = None
+    samples: tuple[sc.DataArray, ...] | None = None
 
 
 class Accumulator(Protocol):
@@ -71,10 +72,10 @@ class VarianceAccum:
             If ``True``, all samples are kept and returned as an attribute called
             ``samples`` with dimension ``monte_carlo``.
         """
-        self._mean: Optional[sc.DataArray] = None
-        self._m2_dist: Optional[sc.Variable] = None
+        self._mean: sc.DataArray | None = None
+        self._m2_dist: sc.Variable | None = None
         self._n_samples = 0
-        self._samples: Optional[List[sc.DataArray]] = [] if keep_samples else None
+        self._samples: list[sc.DataArray] | None = [] if keep_samples else None
 
     def add(self, sample: sc.DataArray) -> None:
         """Register a single sample."""
@@ -168,9 +169,7 @@ class CovarianceAccum:
     # https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Covariance
     # In particular the 'Online' section.
 
-    def __init__(
-        self, *, dims: Optional[Union[List[str], Tuple[str, str]]] = None
-    ) -> None:
+    def __init__(self, *, dims: list[str] | tuple[str, str] | None = None) -> None:
         """Initialize a CovarianceAccum instance.
 
         Parameters

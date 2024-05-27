@@ -174,7 +174,7 @@ def test_variance_accum_new_does_not_return_stored_samples():
         new.get()  # has no samples to get
 
 
-@pytest.mark.parametrize("keep_samples", (True, False))
+@pytest.mark.parametrize("keep_samples", [True, False])
 def test_variance_accum_new_passes_keep_samples_along(keep_samples):
     da = sc.DataArray(
         sc.arange("u", 3.0, unit="s"), coords={"o": sc.arange("u", 3) * 0.1}
@@ -289,7 +289,7 @@ def test_covariance_accum_new_does_not_return_stored_samples():
         new.get()  # has no samples to get
 
 
-@pytest.mark.parametrize("dims", (None, ("x", "y")))
+@pytest.mark.parametrize("dims", [None, ("x", "y")])
 def test_covariance_accum_new_passes_dims_along(dims):
     rng = np.random.default_rng(9)
     da = sc.DataArray(sc.array(dims=["variable"], values=rng.normal(0.0, 1.0, 8)))

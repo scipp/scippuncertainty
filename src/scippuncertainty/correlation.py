@@ -2,12 +2,12 @@
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Computing correlations."""
 
-from typing import TypeVar, Union
+from typing import TypeVar
 
 import numpy as np
 import scipp as sc
 
-T = TypeVar("T", bound=Union[sc.Variable, sc.DataArray])
+T = TypeVar("T", bound=sc.Variable | sc.DataArray)
 
 
 def pearson_correlation(cov: T) -> T:

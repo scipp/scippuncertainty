@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023 Scipp contributors (https://github.com/scipp)
 """Control bootstrap resampling."""
+
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Generator, Mapping
 from concurrent.futures import ThreadPoolExecutor
 from itertools import islice
-from typing import Callable, Dict, Generator, List, Optional, Tuple, Union
 
 import numpy as np
 import scipp as sc
@@ -28,16 +28,16 @@ class MCResult(dict):
     def __init__(
         self,
         *,
-        data: Dict[str, sc.DataArray],
+        data: dict[str, sc.DataArray],
         n_samples: int,
-        samples: Dict[str, Optional[Tuple[sc.DataArray, ...]]],
+        samples: dict[str, tuple[sc.DataArray, ...] | None],
     ) -> None:
         super().__init__(data)
         self._n_samples = n_samples
         self._samples = samples
 
     @classmethod
-    def assemble(cls, results: Dict[str, Accumulated]) -> MCResult:
+    def assemble(cls, results: dict[str, Accumulated]) -> MCResult:
         """Instantiate from results of individual accumulators."""
         n_samples = {val.n_samples for val in results.values()}
         if len(n_samples) != 1:
@@ -61,24 +61,24 @@ class MCResult(dict):
         return self._n_samples
 
     @property
-    def samples(self) -> Mapping[str, Optional[Tuple[sc.DataArray, ...]]]:
+    def samples(self) -> Mapping[str, tuple[sc.DataArray, ...] | None]:
         """Recorded samples for each accumulator."""
         return self._samples
 
 
-def _n_samples_per_thread(n_samples: int, n_thread: int) -> List[int]:
+def _n_samples_per_thread(n_samples: int, n_thread: int) -> list[int]:
     return distribute_evenly(n_samples, n_thread)
 
 
 def _resample_once(
-    samplers: Dict[str, Sampler], rng: np.random.Generator
-) -> Dict[str, sc.DataArray]:
+    samplers: dict[str, Sampler], rng: np.random.Generator
+) -> dict[str, sc.DataArray]:
     return {key: sampler.sample_once(rng) for key, sampler in samplers.items()}
 
 
 def resample(
-    *, samplers: Dict[str, Sampler], rng: np.random.Generator
-) -> Generator[Dict[str, sc.DataArray], None, None]:
+    *, samplers: dict[str, Sampler], rng: np.random.Generator
+) -> Generator[dict[str, sc.DataArray], None, None]:
     """Draw samples from given samplers forever."""
     while True:
         yield _resample_once(samplers, rng)
@@ -86,12 +86,12 @@ def resample(
 
 def resample_n(
     *,
-    samplers: Dict[str, Sampler],
+    samplers: dict[str, Sampler],
     rng: np.random.Generator,
     n: int,
-    progress: Optional[Progress] = None,
+    progress: Progress | None = None,
     description: str = "Monte-Carlo",
-) -> Generator[Dict[str, sc.DataArray], None, None]:
+) -> Generator[dict[str, sc.DataArray], None, None]:
     """Draw n samples.
 
     Passes the RNG to samplers in the following order:
@@ -130,22 +130,19 @@ def resample_n(
 
 
 def run(
-    fn: Callable[..., Union[Dict[str, sc.DataArray], SkipSampleType]],
+    fn: Callable[..., dict[str, sc.DataArray] | SkipSampleType],
     *,
     n_samples: int,
-    samplers: Dict[str, Sampler],
-    accumulators: Optional[Dict[str, Accumulator]] = None,
+    samplers: dict[str, Sampler],
+    accumulators: dict[str, Accumulator] | None = None,
     n_threads: int = 1,
-    seed: Optional[
-        Union[
-            np.random.Generator,
-            List[np.random.Generator],
-            int,
-            List[int],
-            np.random.SeedSequence,
-        ]
-    ] = None,
-    progress: Optional[bool] = None,
+    seed: np.random.Generator
+    | list[np.random.Generator]
+    | int
+    | list[int]
+    | np.random.SeedSequence
+    | None = None,
+    progress: bool | None = None,
     description: str = "Monte-Carlo",
 ) -> MCResult:
     """Propagate uncertainties using Monte-Carlo.
@@ -196,7 +193,12 @@ def run(
     with progress_bars(visible=progress).prepare(len(rngs)) as p_bars:
         with ThreadPoolExecutor(max_workers=len(rngs)) as executor:
             for i, (rng, n_thread_samples, progress_bar) in enumerate(
-                zip(rngs, _n_samples_per_thread(n_samples, len(rngs)), p_bars)
+                zip(
+                    rngs,
+                    _n_samples_per_thread(n_samples, len(rngs)),
+                    p_bars,
+                    strict=True,
+                )
             ):
                 job = _Job(
                     id_=i,
@@ -210,7 +212,7 @@ def run(
 
     accumulators = results[0].result()
     for res in results[1:]:
-        for a, b in zip(accumulators.values(), res.result().values()):
+        for a, b in zip(accumulators.values(), res.result().values(), strict=True):
             a.add_from(b)
     return MCResult.assemble(
         {name: accum.get() for name, accum in accumulators.items()}
@@ -222,8 +224,8 @@ class _Job:
         self,
         *,
         id_: int,
-        base_samplers: Dict[str, Sampler],
-        base_accumulators: Dict[str, Accumulator],
+        base_samplers: dict[str, Sampler],
+        base_accumulators: dict[str, Accumulator],
         rng: np.random.Generator,
         progress_bar: Progress,
         description: str,
@@ -241,10 +243,10 @@ class _Job:
 
     def __call__(
         self,
-        fn: Callable[..., Union[Dict[str, sc.DataArray], SkipSampleType]],
+        fn: Callable[..., dict[str, sc.DataArray] | SkipSampleType],
         *,
         n_samples: int,
-    ) -> Dict[str, Accumulator]:
+    ) -> dict[str, Accumulator]:
         for inputs in resample_n(
             samplers=self._samplers,
             rng=self._rng,

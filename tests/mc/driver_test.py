@@ -216,7 +216,9 @@ def test_run_raises_if_accumulator_is_missing():
         )
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="Mismatch in accumulators and function return value"
+    ):
         run(
             f,
             n_samples=20,
@@ -242,7 +244,9 @@ def test_run_raises_if_extra_accumulator():
         )
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="Mismatch in accumulators and function return value"
+    ):
         run(
             f,
             n_samples=20,
@@ -268,7 +272,9 @@ def test_run_raises_if_accumulator_name_mismatch():
         )
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="Mismatch in accumulators and function return value"
+    ):
         run(
             f,
             n_samples=20,
