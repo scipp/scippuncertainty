@@ -5,17 +5,11 @@
 #
 #    pip-compile-multi
 #
-build==1.0.3
+build==1.2.1
     # via -r wheels.in
-importlib-metadata==6.8.0
+packaging==24.0
     # via build
-packaging==23.2
-    # via build
-pyproject-hooks==1.0.0
+pyproject-hooks==1.1.0
     # via build
 tomli==2.0.1
-    # via
-    #   build
-    #   pyproject-hooks
-zipp==3.17.0
-    # via importlib-metadata
+    # via build
