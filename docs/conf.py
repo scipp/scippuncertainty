@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
-
 import doctest
-
-import scippuncertainty
+from importlib.metadata import version as get_version
 
 # General information about the project.
-project = u'ScippUncertainty'
-copyright = u'2023 Scipp contributors'
-author = u'Scipp contributors'
+project = 'ScippUncertainty'
+copyright = '2024 Scipp contributors'
+author = 'Scipp contributors'
 
 html_show_sourcelink = True
 
@@ -19,13 +16,22 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
-    "sphinxcontrib.bibtex",
+    'sphinxcontrib.bibtex',
+    'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
     'sphinx_copybutton',
-    "sphinx_design",
+    'sphinx_design',
     'nbsphinx',
     'myst_parser',
 ]
+
+try:
+    import sciline.sphinxext.domain_types  # noqa: F401
+
+    extensions.append('sciline.sphinxext.domain_types')
+except ModuleNotFoundError:
+    pass
+
 
 myst_enable_extensions = [
     "amsmath",
@@ -51,6 +57,7 @@ autodoc_type_aliases = {
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
+    'scipp': ('https://scipp.github.io/', None),
 }
 
 # autodocs includes everything, even irrelevant API internals. autosummary
@@ -70,6 +77,18 @@ napoleon_type_aliases = {
 typehints_defaults = 'comma'
 typehints_use_rtype = False
 
+
+sciline_domain_types_prefix = 'scippuncertainty'
+sciline_domain_types_aliases = {
+    'scipp._scipp.core.DataArray': 'scipp.DataArray',
+    'scipp._scipp.core.Dataset': 'scipp.Dataset',
+    'scipp._scipp.core.DType': 'scipp.DType',
+    'scipp._scipp.core.Unit': 'scipp.Unit',
+    'scipp._scipp.core.Variable': 'scipp.Variable',
+    'scipp.core.data_group.DataGroup': 'scipp.DataGroup',
+}
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -87,10 +106,8 @@ master_doc = 'index'
 # built documents.
 #
 
-# The short X.Y version.
-version = scippuncertainty.__version__
-# The full version, including alpha/beta/rc tags.
-release = scippuncertainty.__version__
+release = get_version("scippuncertainty")
+version = ".".join(release.split('.')[:3])  # CalVer
 
 warning_is_error = True
 
@@ -147,7 +164,7 @@ html_theme_options = {
         },
         {
             "name": "Conda",
-            "url": "https://anaconda.org/conda-forge/scippuncertainty",
+            "url": "https://anaconda.org/scipp/scippuncertainty",
             "icon": "fa-custom fa-anaconda",
             "type": "fontawesome",
         },
@@ -181,13 +198,34 @@ htmlhelp_basename = 'scippuncertaintydoc'
 # -- Options for Matplotlib in notebooks ----------------------------------
 
 nbsphinx_execute_arguments = [
-    "--Session.metadata=scipp_docs_build=True",
+    "--Session.metadata=scipp_sphinx_build=True",
 ]
 
 # -- Options for doctest --------------------------------------------------
 
+# sc.plot returns a Figure object and doctest compares that against the
+# output written in the docstring. But we only want to show an image of the
+# figure, not its `repr`.
+# In addition, there is no need to make plots in doctest as the documentation
+# build already tests if those plots can be made.
+# So we simply disable plots in doctests.
 doctest_global_setup = '''
 import numpy as np
+
+try:
+    import scipp as sc
+
+    def do_not_plot(*args, **kwargs):
+        pass
+
+    sc.plot = do_not_plot
+    sc.Variable.plot = do_not_plot
+    sc.DataArray.plot = do_not_plot
+    sc.DataGroup.plot = do_not_plot
+    sc.Dataset.plot = do_not_plot
+except ImportError:
+    # Scipp is not needed by docs if it is not installed.
+    pass
 '''
 
 # Using normalize whitespace because many __str__ functions in scipp produce

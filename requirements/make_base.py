@@ -1,7 +1,6 @@
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import List
 
 import tomli
 
@@ -20,7 +19,7 @@ CUSTOM_AUTO_SEPARATOR = """
 """
 
 
-def write_dependencies(dependency_name: str, dependencies: List[str]) -> None:
+def write_dependencies(dependency_name: str, dependencies: list[str]) -> None:
     path = Path(f"{dependency_name}.in")
     if path.exists():
         sections = path.read_text().split(CUSTOM_AUTO_SEPARATOR)
@@ -40,7 +39,7 @@ def write_dependencies(dependency_name: str, dependencies: List[str]) -> None:
 with open("../pyproject.toml", "rb") as toml_file:
     pyproject = tomli.load(toml_file)
     dependencies = pyproject["project"].get("dependencies")
-    if not dependencies:
+    if dependencies is None:
         raise RuntimeError("No dependencies found in pyproject.toml")
     dependencies = [dep.strip().strip('"') for dep in dependencies]
 
