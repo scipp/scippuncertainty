@@ -1,0 +1,1196 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Monte-Carlo propagation of uncertainties &#8212; ScippUncertainty</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=7a02d4f4"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user-guide/mc';</script>
+    <script src="../_static/anaconda-icon.js?v=461bdc62"></script>
+    <link rel="icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../api-reference/index.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.svg" class="logo__image only-light" alt="ScippUncertainty - Home"/>
+    <script>document.write(`<img src="../_static/logo-dark.svg" class="logo__image only-dark" alt="ScippUncertainty - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api-reference/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../developer/index.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../about/index.html">
+                        About
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../bibliography.html">
+                        Bibliography
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+                    Plopp
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+                    Scipp
+                  </a>
+                </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippuncertainty" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippuncertainty/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/scipp/scippuncertainty" title="Conda" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api-reference/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../developer/index.html">
+                        Development
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../about/index.html">
+                        About
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
+                    More
+                </button>
+                <ul id="pst-nav-more-links-2" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../bibliography.html">
+                        Bibliography
+                      </a>
+                    </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io/plopp">
+                    Plopp
+                  </a>
+                </li>
+                
+
+                <li class="nav-item">
+                  <a class="nav-link dropdown-item nav-external" href="https://scipp.github.io">
+                    Scipp
+                  </a>
+                </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/scipp/scippuncertainty" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/scippuncertainty/" title="PyPI" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-python fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://anaconda.org/scipp/scippuncertainty" title="Conda" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-custom fa-anaconda fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Conda</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Monte-Carlo propagation of uncertainties</a></li>
+</ul>
+</div>
+</nav></div>
+        <div class="sidebar-primary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#One-input-variable">One input variable</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Broadcasting:-introduction-of-correlations">Broadcasting: introduction of correlations</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Computing-the-covariance-matrix">Computing the covariance matrix</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Notes">Notes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Caveats">Caveats</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Choosing-R">Choosing <span class="math notranslate nohighlight">\(R\)</span></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Random-number-generators-and-seeding">Random number generators and seeding</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Multi-threading">Multi-threading</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#Skipping-samples">Skipping samples</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/user-guide/mc.ipynb">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">User guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Monte-Carlo...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Monte-Carlo-propagation-of-uncertainties">
+<h1>Monte-Carlo propagation of uncertainties<a class="headerlink" href="#Monte-Carlo-propagation-of-uncertainties" title="Link to this heading">#</a></h1>
+<p>This guide introduces the <a class="reference internal" href="../api-reference/index.html#monte-carlo"><span class="std std-ref">mc</span></a> sub package for propagation of uncertainties using Monte-Carlo.</p>
+<p>Monte-Carlo (MC) can propagate uncertainties through most operations including non-differentiable ones and operations that introduce correlations. It does so by sampling new data from an input with uncertainties, performing the desired operation on each sample, and combining the results to compute, e.g., a mean and variance. While this method is powerful, it is very expensive and in practice only applicable to relatively small and well behaved data.</p>
+<p>Mathematically, the mc package does the following (the examples below will make the terminology more concrete).</p>
+<p>Given a measured, empirical distribution of random variables <span class="math notranslate nohighlight">\(\mathbf{X}\)</span>, we want to compute some parameter <span class="math notranslate nohighlight">\(\theta\)</span> (the result of our operation). We estimate <span class="math notranslate nohighlight">\(\theta\)</span> using an estimator <span class="math notranslate nohighlight">\(s\)</span>, such that <span class="math notranslate nohighlight">\(\hat{\theta} = s(\mathbf{X})\)</span>. We assume all <span class="math notranslate nohighlight">\(X_i\)</span> to be <strong>independently</strong> distributed with distribution <span class="math notranslate nohighlight">\(X_i = P(\mu_i, \sigma_i)\)</span>, where <span class="math notranslate nohighlight">\(\mu_i\)</span> and <span class="math notranslate nohighlight">\(\sigma_i\)</span> are the mean and standard deviation of <span class="math notranslate nohighlight">\(X_i\)</span>. We draw <span class="math notranslate nohighlight">\(R\)</span> samples
+(‘replicas’) from <span class="math notranslate nohighlight">\(P\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{x}^\ast = [x_{i_1}^\ast,\, \dots, x_{i_n}^\ast], \quad \text{where} \quad x_i^\ast \sim X_i = P(\mu_i, \sigma_i).\]</div>
+<p>Then we pass each sample to the estimator <span class="math notranslate nohighlight">\(s\)</span> to obtain replicas of the target parameter <span class="math notranslate nohighlight">\(\hat{\theta}^\ast = s(\mathbf{x}^\ast)\)</span>. The final results are then, typically, the mean and variance over all <span class="math notranslate nohighlight">\(R\)</span> replicas</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mu(\hat{\theta}^\ast) = \frac{1}{R} \sum_{r=1}^{R}\,s(\mathbf{x}^\ast_r),\\\\
+\text{var}(\hat{\theta}^\ast) = \frac{1}{R-1} \sum_{r=1}^{R}\,{\big(s(\mathbf{x}^\ast_r) - \mu(\hat{\theta}^\ast)\big)}^2\end{split}\]</div>
+<p>Let’s look at some examples to make this more concrete. Suppose we are given some positions and time information and want to compute the corresponding speeds. We will assume that all input data is independently normally distributed. First, generate some dummy data of positions with uncertainties:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">plopp</span> <span class="k">as</span> <span class="nn">pp</span>
+<span class="kn">import</span> <span class="nn">scipp</span> <span class="k">as</span> <span class="nn">sc</span>
+
+<span class="kn">from</span> <span class="nn">scippuncertainty</span> <span class="kn">import</span> <span class="n">mc</span>
+
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+
+<span class="c1"># Format units of variances nicely.</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">aliases</span><span class="p">[</span><span class="s1">&#39;m^2/s^2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;m^2/s^2&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">381</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">variances</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+<span class="n">pos</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+        <span class="n">values</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variances</span><span class="p">)),</span>
+        <span class="n">variances</span><span class="o">=</span><span class="n">variances</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
+<span class="p">)</span>
+<span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/user-guide_mc_2_0.svg" src="../_images/user-guide_mc_2_0.svg" /></div>
+</div>
+<section id="One-input-variable">
+<h2>One input variable<a class="headerlink" href="#One-input-variable" title="Link to this heading">#</a></h2>
+<p>Suppose we want to compute some speed from the positions given above and the following time. For now, the time is assumed to be exact, i.e., it has no variances.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Define a function to compute the speed. This corresponds to the estimator <span class="math notranslate nohighlight">\(s\)</span>. (You will see below why this returns a <code class="docutils literal notranslate"><span class="pre">dict</span></code>.)</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_speed</span><span class="p">(</span><span class="n">pos</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">pos</span> <span class="o">/</span> <span class="n">time</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Given these times and speed calculation, we could do regular error propagation using Scipp’s builtin mechanism. We can use this to check our MC results later.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">speed_regular</span> <span class="o">=</span> <span class="n">compute_speed</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">)[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Now, in order to compute the uncertainties with MC, we need to create a few helper objects. First, define a sampler. This will be used to draw new samples from the input <code class="docutils literal notranslate"><span class="pre">pos</span></code>. Since we assume normally distributed data, we use a <a class="reference internal" href="../generated/modules/scippuncertainty.mc.sampler.NormalDenseSampler.html"><span class="doc">NormalDenseSampler</span></a>. This defines the distribution <span class="math notranslate nohighlight">\(X_i = P(\mu_i, \sigma_i)\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pos_sampler</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">NormalDenseSampler</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Next, we need to define how to collect the replicas and compute an output statistic. In this case, we simply want to compute the mean and variance which is implemented by <a class="reference internal" href="../generated/modules/scippuncertainty.mc.accumulator.VarianceAccum.html"><span class="doc">VarianceAccum</span></a>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">accumulator</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">VarianceAccum</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>Finally, we can use <a class="reference internal" href="../generated/modules/scippuncertainty.mc.driver.run.html"><span class="doc">mc.run</span></a> to put everything together and actually perform the MC computation.</p>
+<p>We pass a <code class="docutils literal notranslate"><span class="pre">dict</span></code> as the samplers that identifies the <code class="docutils literal notranslate"><span class="pre">pos_sampler</span></code> with the <code class="docutils literal notranslate"><span class="pre">pos</span></code> argument of <code class="docutils literal notranslate"><span class="pre">compute_speed</span></code>. The accumulators <code class="docutils literal notranslate"><span class="pre">dict</span></code> defines how to accumulate each output of <code class="docutils literal notranslate"><span class="pre">compute_speed</span></code>. There is only one here, but the accumulators still have to match the name in the <code class="docutils literal notranslate"><span class="pre">dict</span></code> returned by <code class="docutils literal notranslate"><span class="pre">compute_speed</span></code>. Since <code class="docutils literal notranslate"><span class="pre">time</span></code> has no uncertainties, we simply bind our fixed values using <code class="docutils literal notranslate"><span class="pre">partial</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">n_samples</span></code> corresponds to the number of replicas <span class="math notranslate nohighlight">\(R\)</span>. It is very high in this case because the computation is quite fast. In practice, numbers in the hundreds or low thousands are more feasible. Lastly, we disable progress reporting as this does not work reliably in Jupyter.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">partial</span><span class="p">(</span><span class="n">compute_speed</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">),</span>
+    <span class="n">samplers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos_sampler</span><span class="p">},</span>
+    <span class="n">accumulators</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">accumulator</span><span class="p">},</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+    <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">speed_mc</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Now compare the results of the two calculations. It looks like MC and ‘regular’ uncertainty propagation are in agreement.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">({</span><span class="s2">&quot;regular&quot;</span><span class="p">:</span> <span class="n">speed_regular</span><span class="p">,</span> <span class="s2">&quot;mc&quot;</span><span class="p">:</span> <span class="n">speed_mc</span><span class="p">},</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/user-guide_mc_16_0.svg" src="../_images/user-guide_mc_16_0.svg" /></div>
+</div>
+<p>Also compare the relative errors of both results. Again, there is general agreement as expected. However there are some deviations because MC has only a finite precision.</p>
+<div class="admonition warning">
+<p class="admonition-title"><strong>Attention</strong></p>
+<p>Always make sure that your MC has properly converged to the desired precision. See the choosing <span class="math notranslate nohighlight">\(R\)</span> section below.</p>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">relative_error</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">sc</span><span class="o">.</span><span class="n">stddevs</span><span class="p">(</span><span class="n">da</span><span class="p">)</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="n">da</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_relative_errors</span><span class="p">(</span>
+    <span class="n">data_regular</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">data_mc</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+    <span class="n">rel_err_regular</span> <span class="o">=</span> <span class="n">relative_error</span><span class="p">(</span><span class="n">data_regular</span><span class="p">)</span>
+    <span class="n">rel_err_mc</span> <span class="o">=</span> <span class="n">relative_error</span><span class="p">(</span><span class="n">data_mc</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">))</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_gridspec</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">height_ratios</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hspace</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">({</span><span class="s2">&quot;regular&quot;</span><span class="p">:</span> <span class="n">rel_err_regular</span><span class="p">,</span> <span class="s2">&quot;mc&quot;</span><span class="p">:</span> <span class="n">rel_err_mc</span><span class="p">},</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\sigma_\mathsf</span><span class="si">{rel}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rel_err_regular</span> <span class="o">-</span> <span class="n">rel_err_mc</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$\Delta$&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_relative_errors</span><span class="p">(</span><span class="n">speed_regular</span><span class="p">,</span> <span class="n">speed_mc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/user-guide_mc_20_0.png" src="../_images/user-guide_mc_20_0.png" />
+</div>
+</div>
+</section>
+<section id="Broadcasting:-introduction-of-correlations">
+<h2>Broadcasting: introduction of correlations<a class="headerlink" href="#Broadcasting:-introduction-of-correlations" title="Link to this heading">#</a></h2>
+<p>This section introduces both the impact of correlations and how to sample from multiple inputs.</p>
+<p>In the section above, there is no reason to use Monte-Carlo to propagate uncertainties because Scipp’s builtin method is correct. So now, let us look at a case where regular uncertainty propagation fails because it cannot account for correlations. A common source of correlations in Scipp is broadcasting of data with variances. To this end, define a new <code class="docutils literal notranslate"><span class="pre">time</span></code> data array, this time with variances:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_with_var</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">0.1</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Modify the speed function to also compute the average speed as this is sensitive to correlations:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_average_speed</span><span class="p">(</span>
+    <span class="n">pos</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">pos</span> <span class="o">/</span> <span class="n">time</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">speed</span><span class="p">,</span> <span class="s2">&quot;average_speed&quot;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">speed</span><span class="p">)}</span>
+</pre></div>
+</div>
+</div>
+<p>Trying to call <code class="docutils literal notranslate"><span class="pre">compute_average_speed</span></code> with this new time raises an exception. This is because <code class="docutils literal notranslate"><span class="pre">time</span></code> needs to be broadcast to match the shape of <code class="docutils literal notranslate"><span class="pre">pos</span></code>. In other words, the same time value needs to be divided into every single position value. This would introduce correlations between the resulting speeds as they would all depend on the same time and its uncertainty. Scipp cautiously prevents such broadcasts.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">compute_average_speed</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time_with_var</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">VariancesError</span>                            Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[15], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> <span class="ansi-yellow-bg">compute_average_speed</span><span class="ansi-yellow-bg">(</span><span class="ansi-yellow-bg">pos</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">pos</span><span class="ansi-yellow-bg">,</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">time</span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">=</span><span class="ansi-yellow-bg">time_with_var</span><span class="ansi-yellow-bg">)</span>
+
+Cell <span class="ansi-green-fg">In[14], line 4</span>, in <span class="ansi-cyan-fg">compute_average_speed</span><span class="ansi-blue-fg">(pos, time)</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-bold" style="color: rgb(0,135,0)">def</span> <span style="color: rgb(0,0,255)">compute_average_speed</span>(
+<span class="ansi-green-intense-fg ansi-bold">      2</span>     pos: sc<span style="color: rgb(98,98,98)">.</span>DataArray, time: sc<span style="color: rgb(98,98,98)">.</span>DataArray
+<span class="ansi-green-intense-fg ansi-bold">      3</span> ) <span style="color: rgb(98,98,98)">-</span><span style="color: rgb(98,98,98)">&gt;</span> <span style="color: rgb(0,135,0)">dict</span>[<span style="color: rgb(0,135,0)">str</span>, sc<span style="color: rgb(98,98,98)">.</span>DataArray]:
+<span class="ansi-green-fg">----&gt; 4</span>     speed <span style="color: rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">pos</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg" style="color: rgb(98,98,98)">/</span><span class="ansi-yellow-bg"> </span><span class="ansi-yellow-bg">time</span>
+<span class="ansi-green-intense-fg ansi-bold">      5</span>     <span class="ansi-bold" style="color: rgb(0,135,0)">return</span> {<span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">speed</span><span style="color: rgb(175,0,0)">&#34;</span>: speed, <span style="color: rgb(175,0,0)">&#34;</span><span style="color: rgb(175,0,0)">average_speed</span><span style="color: rgb(175,0,0)">&#34;</span>: sc<span style="color: rgb(98,98,98)">.</span>mean(speed)}
+
+<span class="ansi-red-fg">VariancesError</span>: Cannot broadcast object with variances as this would introduce unhandled correlations. Input dimensions were:
+(x: 10) variances=True
+() variances=True
+
+See https://doi.org/10.3233/JNR-220049 for more background.
+</pre></div></div>
+</div>
+<p>For this guide, let us bypass Scipp’s check by using an explicit broadcast.</p>
+<div class="admonition warning">
+<p class="admonition-title"><strong>Warning</strong></p>
+<p>In practice, you have to check whether this is valid for your concrete use case!</p>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">compute_average_speed</span><span class="p">(</span>
+    <span class="n">pos</span><span class="o">=</span><span class="n">pos</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">sc</span><span class="o">.</span><span class="n">broadcast</span><span class="p">(</span><span class="n">time_with_var</span><span class="p">,</span> <span class="n">sizes</span><span class="o">=</span><span class="n">pos</span><span class="o">.</span><span class="n">sizes</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">speed_regular</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span>
+<span class="n">average_speed_regular</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;average_speed&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Now, set up the MC run in a similar way to before. First, define samplers for both position and time. This defines the probability distribution as the concatenation <span class="math notranslate nohighlight">\(X = [P_{\text{pos}}(\mu, \sigma), P_{\text{time}}(\mu, \sigma)]\)</span>.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pos_sampler</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">NormalDenseSampler</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+<span class="n">time_sampler</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">NormalDenseSampler</span><span class="p">(</span><span class="n">time_with_var</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Define accumulators for both outputs of <code class="docutils literal notranslate"><span class="pre">compute_average_speed</span></code>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">speed_accumulator</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">VarianceAccum</span><span class="p">()</span>
+<span class="n">average_speed_accumulator</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">VarianceAccum</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>And then perform the MC computation:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">compute_average_speed</span><span class="p">,</span>
+    <span class="n">samplers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos_sampler</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time_sampler</span><span class="p">},</span>
+    <span class="n">accumulators</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">speed_accumulator</span><span class="p">,</span>
+        <span class="s2">&quot;average_speed&quot;</span><span class="p">:</span> <span class="n">average_speed_accumulator</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+    <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">speed_mc</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span>
+<span class="n">average_speed_mc</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;average_speed&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>We can inspect the relative error of the speed per position as before. Again, MC and regular uncertainty propagation mostly agree. (The larger discrepancies compared to before are due to the larger spread of samples in MC due to the variance of <code class="docutils literal notranslate"><span class="pre">time</span></code>).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plot_relative_errors</span><span class="p">(</span><span class="n">speed_regular</span><span class="p">,</span> <span class="n">speed_mc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/user-guide_mc_36_0.png" src="../_images/user-guide_mc_36_0.png" />
+</div>
+</div>
+<p>The above is expected because the induced correlations do not show up in the variances of the speed. We need to look at a quantity that is sensitive to those correlations. For example, the average speed as it is summed over all component speeds.</p>
+<p>Indeed, MC produces a significantly larger standard deviation than regular propagation of uncertainties:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Regular: </span><span class="si">{</span><span class="n">average_speed_regular</span><span class="o">.</span><span class="n">data</span><span class="si">:</span><span class="s2">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MC:      </span><span class="si">{</span><span class="n">average_speed_mc</span><span class="o">.</span><span class="n">data</span><span class="si">:</span><span class="s2">c</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Regular: 0.549(2) m/s
+MC:      0.549(6) m/s
+</pre></div></div>
+</div>
+</section>
+<section id="Computing-the-covariance-matrix">
+<h2>Computing the covariance matrix<a class="headerlink" href="#Computing-the-covariance-matrix" title="Link to this heading">#</a></h2>
+<p>We can also compute the covariance matrix directly. This lets us inspect correlations of the results on more general grounds.</p>
+<p>Again, define samplers for position and time:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pos_sampler</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">NormalDenseSampler</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+<span class="n">time_sampler</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">NormalDenseSampler</span><span class="p">(</span><span class="n">time_with_var</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Then, define an accumulator for the covariance in addition to the variance.</p>
+<p>Note that Scipp has no native way of encoding matrices. So we work around this by storing a 2D array with artificial dimension labels (<code class="docutils literal notranslate"><span class="pre">dims</span></code>).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">variance_accumulator</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">VarianceAccum</span><span class="p">()</span>
+<span class="n">covariance_accumulator</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">CovarianceAccum</span><span class="p">(</span><span class="n">dims</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;x0&quot;</span><span class="p">,</span> <span class="s2">&quot;x1&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>In order to use this, we need to return an additional result from our speed function. Since we want both the mean+variance and covariance matrix of the same result, the speed, we simply return it twice.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_speed_cov</span><span class="p">(</span><span class="n">pos</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">pos</span> <span class="o">/</span> <span class="n">time</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">speed</span><span class="p">,</span> <span class="s2">&quot;speed_cov&quot;</span><span class="p">:</span> <span class="n">speed</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Now, run the MC calculation:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">compute_speed_cov</span><span class="p">,</span>
+    <span class="n">samplers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos_sampler</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time_sampler</span><span class="p">},</span>
+    <span class="n">accumulators</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">variance_accumulator</span><span class="p">,</span> <span class="s2">&quot;speed_cov&quot;</span><span class="p">:</span> <span class="n">covariance_accumulator</span><span class="p">},</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+    <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">speed_mc</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;speed&quot;</span><span class="p">]</span>
+<span class="n">speed_cov</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s2">&quot;speed_cov&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">speed_mc</span></code> is the same as before. And <code class="docutils literal notranslate"><span class="pre">speed_cov</span></code> holds the variance-covariance matrix:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">speed_cov</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/user-guide_mc_48_0.svg" src="../_images/user-guide_mc_48_0.svg" /></div>
+</div>
+<p>The variance-covariance matrix is difficult to interpret. So compute the linear correlation matrix:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scippuncertainty</span> <span class="kn">import</span> <span class="n">pearson_correlation</span>
+
+<span class="n">pp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pearson_correlation</span><span class="p">(</span><span class="n">speed_cov</span><span class="p">),</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/user-guide_mc_50_0.svg" src="../_images/user-guide_mc_50_0.svg" /></div>
+</div>
+<p>We can see that there are significant correlations between speeds, characterized by off-diagonal elements being close to 1.</p>
+</section>
+<section id="Notes">
+<h2>Notes<a class="headerlink" href="#Notes" title="Link to this heading">#</a></h2>
+<section id="Caveats">
+<h3>Caveats<a class="headerlink" href="#Caveats" title="Link to this heading">#</a></h3>
+<p>Monte-Carlo is a big gun and should only be used as a last resort. It requires <strong>large computational resources</strong>, time and memory. So much so that a supercomputer is required for many non-trivial problems. It is generally advisable to look for different solutions. It may, for example, be possible to compute variance-covariance matrices analytically or use an automatic differentiation library.</p>
+<p>Monte-Carlo is a random process and as such only produces <strong>estimates</strong> of uncertainties. And the uncertainty of those estimates usually reduces as <span class="math notranslate nohighlight">\(1 / \sqrt{R}\)</span>. This makes MC prohibitively expensive if the estimated distribution has a wide spread. For the examples above, if the input variables for position and time had standard deviations larger than a few percent, the MC results would be too noisy to be useful.</p>
+</section>
+<section id="Choosing-R">
+<h3>Choosing <span class="math notranslate nohighlight">\(R\)</span><a class="headerlink" href="#Choosing-R" title="Link to this heading">#</a></h3>
+<p><span class="math notranslate nohighlight">\(R\)</span> needs to be large enough for MC to converge. Empirically, convergence can be determined by running MC with a given <span class="math notranslate nohighlight">\(R\)</span>, say 100, and store the result. Then, run it again with a larger <span class="math notranslate nohighlight">\(R\)</span>, say 1000, and check if there is a significant difference in the results.</p>
+<p>Anecdotally, an <span class="math notranslate nohighlight">\(R\)</span> in the hundreds is often sufficient. However, as mentioned above, MC converges rather slowly as <span class="math notranslate nohighlight">\(1 / \sqrt{R}\)</span>. So some cases will require much larger <span class="math notranslate nohighlight">\(R\)</span>s.</p>
+</section>
+<section id="Random-number-generators-and-seeding">
+<h3>Random number generators and seeding<a class="headerlink" href="#Random-number-generators-and-seeding" title="Link to this heading">#</a></h3>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">mc.run</span></code> constructs its own random number generator (RNG) and seeds it from the system RNG. If you want to make the process reproducible, you can pass a concrete seed via the <code class="docutils literal notranslate"><span class="pre">seed</span></code> argument. See the documentation of <a class="reference internal" href="../generated/modules/scippuncertainty.mc.driver.run.html"><span class="doc">mc.run</span></a> for details.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mc.run</span></code> also sends a log message with the seed it uses. We can see it by configuring the logger, e.g., using the following.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">scippuncertainty.logging</span> <span class="kn">import</span> <span class="n">get_logger</span>
+
+<span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+<span class="n">handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
+<span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+<span class="n">get_logger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">compute_average_speed</span><span class="p">,</span>
+    <span class="n">samplers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="n">pos_sampler</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time_sampler</span><span class="p">},</span>
+    <span class="n">accumulators</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;speed&quot;</span><span class="p">:</span> <span class="n">speed_accumulator</span><span class="p">,</span>
+        <span class="s2">&quot;average_speed&quot;</span><span class="p">:</span> <span class="n">average_speed_accumulator</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Seeding 1 random generators with entropy 186879802730428864953925297439487444399.
+The generators are of type Generator(PCG64) from numpy.random version 1.26.4
+</pre></div></div>
+</div>
+</section>
+<section id="Multi-threading">
+<h3>Multi-threading<a class="headerlink" href="#Multi-threading" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">mc.run</span></code> can use multiple threads where each thread processes a subset of samples. Simply set the desired number of threads with the <code class="docutils literal notranslate"><span class="pre">n_threads</span></code> argument.</p>
+<p>But bear in mind that this uses Python’s threads. So you will only see a speedup if your function spends a lot of time in code that releases the global interpreter lock (GIL). Most functions in Scipp do this. However, since the data in the examples here is so small, multi threading does not improve performance.</p>
+<p>Note further that most functions in Scipp are internally multi threaded. So you should make sure not to oversubscribe your CPU.</p>
+</section>
+<section id="Skipping-samples">
+<h3>Skipping samples<a class="headerlink" href="#Skipping-samples" title="Link to this heading">#</a></h3>
+<p>Monte-Carlo can sometimes produce samples that our operation cannot handle, for example because a sample contains a 0 or a fit fails to converge. It is possible to skip those samples.</p>
+<p>For example, suppose that we had a function that requires positive inputs like <code class="docutils literal notranslate"><span class="pre">sqrt</span></code>. We can detect negative inputs and return <code class="docutils literal notranslate"><span class="pre">mc.SkipSample</span></code> instead of actual data. This instructs <code class="docutils literal notranslate"><span class="pre">mc.run</span></code> to ignore this sample and carry on with the next one.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">skipping_op</span><span class="p">(</span><span class="n">da</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">sc</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">da</span> <span class="o">&lt;</span> <span class="n">sc</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mc</span><span class="o">.</span><span class="n">SkipSample</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;sqrt&quot;</span><span class="p">:</span> <span class="n">sc</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">da</span><span class="p">)}</span>
+</pre></div>
+</div>
+</div>
+<p>Note, though, that failed samples still count towards the target <code class="docutils literal notranslate"><span class="pre">n_samples</span></code> passed to <code class="docutils literal notranslate"><span class="pre">mc.run</span></code>. So the actual number of samples used for the output variance can be different. To find out, look at the <code class="docutils literal notranslate"><span class="pre">n_samples'</span></code> property:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data with large variances s.t. some samples are negative.</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">da</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
+    <span class="n">sc</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+        <span class="n">values</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="n">variances</span><span class="o">=</span><span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">x</span><span class="p">},</span>
+<span class="p">)</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="n">mc</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">skipping_op</span><span class="p">,</span>
+    <span class="n">samplers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;da&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">NormalDenseSampler</span><span class="p">(</span><span class="n">da</span><span class="p">)},</span>
+    <span class="n">accumulators</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;sqrt&quot;</span><span class="p">:</span> <span class="n">mc</span><span class="o">.</span><span class="n">VarianceAccum</span><span class="p">()},</span>
+    <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">results</span><span class="o">.</span><span class="n">n_samples</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Seeding 1 random generators with entropy 324519139704576124022978518398527001200.
+The generators are of type Generator(PCG64) from numpy.random version 1.26.4
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+80
+</pre></div></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="installation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Installation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../api-reference/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">API Reference</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2024 Scipp contributors.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><!-- This will display the version of the docs -->
+Current ScippUncertainty version: 24.5.0 (<a href="https://github.com//scippuncertainty/releases">older versions</a>).</div>
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
