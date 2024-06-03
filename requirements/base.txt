@@ -7,5 +7,5 @@
 #
 numpy==1.26.4
     # via scipp
-scipp==24.5.0
+scipp==24.5.1
     # via -r base.in
